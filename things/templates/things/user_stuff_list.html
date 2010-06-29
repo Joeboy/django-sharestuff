@@ -4,9 +4,34 @@
 <h2>{{ userprofile.user.username }}'s offers</h2>
 
 {% for offer in userprofile.thing_set.live %}
-    <div class="hlisting offer-free">
-        <div class="summary">{{ offer.title }}</div>
-        <div class="description">{{ offer.description }}</div>
+    <div class="hlisting">
+      {% if offer.thingimage_set.all %}
+        <div class="thing-image-img-container">
+          {% for offer_image in offer.thingimage_set.all %}
+            <div class="thing-image-img-inner-container">
+              <img src="{{ offer_image.image.url }}" alt="{{ offer_image.caption }}" />
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+
+      <div class="item">
+        <h4 class="fn">{{ offer.title }}</h4>
+      </div>
+
+      <div class="offer gift"></div>
+
+      <p class="description">
+          {{ offer.description }}
+      </p>
+
+      <p class="lister vcard">Listed by
+        <a class="url fn nickname" href="{% url user_details userprofile.user.username %}">{{ userprofile.user.username }}</a>
+      on <abbr class="dtlisted" title="{{ offer.date_time_added.isoformat }}">{{ offer.date_time_added }}</abbr>
+      </p>
+    <div style="clear:right"></div>
     </div>
 {% endfor %}
 {% endblock %}
+

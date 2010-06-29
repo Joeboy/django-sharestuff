@@ -1,9 +1,18 @@
 from django import forms
+from django.forms.models import inlineformset_factory
+from things.models import Thing, ThingImage
 from userprofile.models import UserProfile
 
-class UserProfileForm(forms.Form):
-    latitude = forms.FloatField(required=False)
-    longitude = forms.FloatField(required=False)
+class UserProfileForm(forms.ModelForm):
+    """
+    Form to allow registered users to edit their profile info.
+    Includes extra email field as that goes in User, not UserProfile.
+    """
+    email = forms.EmailField()
+
+    class Meta:
+        model = UserProfile
+        exclude = ('user', 'commercial',)
 
     def clean(self):
         if not self.cleaned_data['latitude'] or not self.cleaned_data['longitude']:
@@ -15,8 +24,19 @@ class UserProfileForm(forms.Form):
             raise forms.ValidationError("Sorry, the location you specified isn't in the British Isles. Please try again.")
         return self.cleaned_data
 
-class UserProfileForm(forms.ModelForm):
-    email = forms.EmailField()
+
+class OfferForm(forms.ModelForm):
+    """
+    A form that allows a user to add/edit an offer
+    """
     class Meta:
-        model = UserProfile
-        exclude = ('user', 'commercial',)
+        model = Thing
+        exclude=('taken_status_other', 'regular', 'donor', 'date_time_added')
+
+
+OfferImageFormSet = inlineformset_factory(Thing, 
+    ThingImage, 
+    can_delete=True,
+    extra=1)
+
+

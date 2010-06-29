@@ -52,7 +52,7 @@ ul.messages li {
 }
 
 /* Forms markup */
-div.errors {
+div.errors, ul.errorlist {
     background-color:#ffeedd;
     border: 1px solid #ccc;
     margin:2px;
@@ -111,4 +111,33 @@ form#edit-thing .thing-image-img-container {
 form#edit-thing .thing-image-img {
     width:90px;
     overflow-y:hidden;
+}
+
+.hlisting {
+    border: 1px solid #ccc;
+    padding:6px;
+    width:630px;
+    margin-top: 5px;
+    background-color:#eee;
+}
+
+.hlisting h4 {
+    margin-top:6px;
+}
+
+span.offer.gift {
+    display:none;
+}
+
+.hlisting .thing-image-img-container {
+    width:100px;
+    float:right;
+    margin-left: 8px;
+}
+
+.hlisting .thing-image-img-inner-container {
+    width:100px;
+    height:100px;
+    overflow:hidden;
+    border:1px solid #ccc;
 }

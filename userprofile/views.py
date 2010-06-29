@@ -5,11 +5,12 @@ from django.contrib.localflavor.uk.forms import UKPostcodeField
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
-from django.forms.models import inlineformset_factory
+from django.core.urlresolvers import reverse
 
 from userprofile.models import UserProfile
 from userprofile.decorators import userprofile_view
 from userprofile.forms import UserProfileForm
+from userprofile.forms import OfferForm, OfferImageFormSet
 
 from things.models import Thing, ThingImage
 import math
@@ -18,6 +19,7 @@ import math
 def lat_long_to_easting_northing(lat, lon):
     """ Ridiculously fussy function for converting longitude/latitude to UK
         OS national grid co-ordinates """
+    # DON'T THINK I'M GOING TO BE USING THIS FUNCTION
     # lat / lon need to be in radians
     
     a, b = 6377563.396, 6356256.910          # Airy 1830 major & minor semi-axes
@@ -84,10 +86,6 @@ def home(request):
     if request.method == 'POST':
         userprofile_form = UserProfileForm(request.POST, instance=userprofile)
         if userprofile_form.is_valid():
-#            latitude = userprofile_form.cleaned_data['latitude']
-#            longitude = userprofile_form.cleaned_data['longitude']
-#            userprofile.latitude, userprofile.longitude = latitude, longitude
-#            userprofile.easting, userprofile.northing = lat_long_to_easting_northing(latitude, longitude)
             userprofile_form.save()
             # Email is in the User model, not UserProfile so:
             userprofile.user.email = userprofile_form.cleaned_data['email']
@@ -104,23 +102,15 @@ def home(request):
 def my_offers(request):
     return render_to_response('userprofile/my_stuff.html', context_instance=RequestContext(request))
 
-class OfferForm(forms.ModelForm):
-    class Meta:
-        model = Thing
-        exclude=('taken_status_other', 'regular', 'donor', 'date_time_added')
-
-
-OfferImageFormSet = inlineformset_factory(Thing, 
-    ThingImage, 
-    can_delete=True,
-    extra=1)
-
-
 @login_required
 def edit_offer(request, thing_id=None):
+    """
+    Form that lets a user create or edit an offer
+    """
     if request.method == 'POST':
+        userprofile = request.user.get_profile()
         if thing_id:
-            thing = get_object_or_404(Thing, id=thing_id)
+            thing = get_object_or_404(Thing, id=thing_id, donor=userprofile)
             action="edited"
         else:
             thing = None
@@ -128,14 +118,14 @@ def edit_offer(request, thing_id=None):
         form = OfferForm(request.POST, request.FILES, instance=thing)
         if form.is_valid():
             thing = form.save(commit=False)
-            thing.donor = request.user.get_profile()
+            thing.donor = userprofile
             thingimage_formset = OfferImageFormSet(request.POST, request.FILES, instance=thing)
             if thingimage_formset.is_valid():
                 thing.save()
                 thingimage_formset.save()  
                 messages.success(request, "An item was successfully %s." % action)
 
-            return HttpResponseRedirect('/userprofile/my-stuff/')
+            return HttpResponseRedirect(reverse('my_offers'))
     else:
         if thing_id:
             thing = get_object_or_404(Thing, id=thing_id)
@@ -159,10 +149,10 @@ def delete_offer(request, thing_id):
         thing = get_object_or_404(Thing, id=thing_id)
         thing.delete()
         messages.success(request, "An item of stuff was deleted.")
-        return HttpResponseRedirect('/userprofile/my-stuff/')
+        return HttpResponseRedirect(reverse('my_offers'))
     elif request.GET.get('confirm')=='no':
         messages.success(request, "Deletion of stuff cancelled.")
-        return HttpResponseRedirect('/userprofile/my-stuff/')
+        return HttpResponseRedirect(reverse('my_offers'))
     else:
         return render_to_response('userprofile/confirm_delete_thing.html',
                                   context_instance=RequestContext(request))

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.http import HttpResponseServerError
+from django.http import HttpResponseServerError, Http404
 
 def userprofile_view(func):
     """
@@ -7,8 +7,9 @@ def userprofile_view(func):
     turns it into a 'userprofile' object and passes that object to the view.
     """
     def _inner(request, *args, **kwargs):
+        username = kwargs.pop('username')
         try:
-            user = User.objects.get(username=kwargs.pop('username'))
+            user = User.objects.get(username=username)
         except User.DoesNotExist:
             raise Http404('Couldn\'t find user "%s".' % (username,))
         except KeyError:

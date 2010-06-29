@@ -24,6 +24,11 @@
 {% endwith %}
 
 <h4>Contact details</h4>
+
+{% if userprofile_form.errors %}
+    {{ userprofile_form.errors.as_ul }}
+{% endif %}
+
 <form action="" method="post" id="userprofile_form">{% csrf_token %}
     <p><label for="id_email">Email:</label>{{ userprofile_form.email }}</p>
     <p><label for="id_phone_number">Phone number:</label>{{ userprofile_form.phone_number }}</p>
