@@ -12,7 +12,7 @@
 
 <body>
     <div id="masthead">
-        <h2><a href="/">sharestuff.org.uk</a></h2>
+        <h2><a href="{% url website_home %}">sharestuff.org.uk</a></h2>
     </div>
 
 	<div id="container">
@@ -20,9 +20,9 @@
 			{% block menu %}{% endblock %}
 {% if user.is_authenticated %}
 <p>Hello <strong>{{user.username}}</strong></p>
-<p><a href="/userprofile/">Profile</a> | <a href="/userprofile/my-stuff/">Your stuff</a> | <a href="/accounts/logout/">Log out</a></p>
+<p><a href="{% url user_home %}">Profile</a> | <a href="{% url my_offers %}">Your offers</a> | <a href="{% url auth_logout %}">Log out</a></p>
 {% else %}
-<p><a href="/accounts/login/">Log in</a> | <a href="/accounts/register/">Register</a></p>
+<p><a href="{% url auth_login %}">Log in</a> | <a href="{% url registration_register %}">Register</a></p>
 {% endif %}
 		</div>
 		{% block content %}{% endblock %}

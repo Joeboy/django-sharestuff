@@ -36,5 +36,14 @@ Longer term plans
 Status
 ======
 
-I just created a repo, and have started writing this README. That's about as far
-as I've got.
+Still lots to do before it's actually useful. So far it's possible for users to
+register and enter offer details, but serving and searching those listings is
+still TODO.
+
+Getting it working
+==================
+
+It's a pretty standard Django project, so I won't provide detailed instructions.
+Check it out, install the dependencies (which I will list at some point...), 
+copy localsettings.py.dist to localsettings.py, edit localsettings.py, then you
+should be able to do the syncdb and runserver shizzle.

@@ -20,16 +20,26 @@
 {% endif %}
 
 {% with user.get_profile.thing_set.live.count as live_thing_count %}
-    <p>You are currently offering {{ live_thing_count }} item{{ live_thing_count|pluralize }}. <a href="/userprofile/my-stuff/">View/edit your stuff</a></p>
+    <p>You are currently offering {{ live_thing_count }} item{{ live_thing_count|pluralize }}. <a href="{% url my_offers %}">View/edit your stuff</a></p>
 {% endwith %}
-<h4>Location</h4>
+
+<h4>Contact details</h4>
 <form action="" method="post" id="userprofile_form">{% csrf_token %}
-{% if user.get_profile.latitude %}
-<p>The map below indicates your location. To change your location drag the marker to your preferred location.</p>
-{% else %}
-<p>In order to allow you to find other people's items, and to allow other people to find your items, please place a marker on the map and drag it to your location.</p>
-{% endif %}
-    <div style="display:none;">{{userprofile_form.as_p}}</div>
+    <p><label for="id_email">Email:</label>{{ userprofile_form.email }}</p>
+    <p><label for="id_phone_number">Phone number:</label>{{ userprofile_form.phone_number }}</p>
+
+    <h4>Location</h4>
+    {% if user.get_profile.latitude %}
+        <p>The map below indicates your location. To change your location drag the marker to your preferred location.</p>
+    {% else %}
+        <p>In order to allow you to find other people's items, and to allow other people to find your items, please place a marker on the map and drag it to your location.</p>
+    {% endif %}
+
+    <div style="display:none;border:1px solid #f0f;">
+        {{userprofile_form.longitude}}
+        {{userprofile_form.latitude}}
+    </div>
+
     <div id="map_canvas" style="width: 300px; height: 300px"></div>
 
 <input type="submit" value="Update">

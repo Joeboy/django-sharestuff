@@ -7,14 +7,15 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    (r'^$', 'sharestuff.views.home'),
+    url(r'^$', 'sharestuff.views.home', name="website_home"),
 
 #    (r'^stuff/', include('things.urls')),
-    (r'^accounts/profile/$', 'django.views.generic.simple.redirect_to', {'url':'/userprofile/',}),
-    (r'^accounts/register/$', 'registration.views.register', {'profile_callback':create_userprofile,}),
-    (r'^accounts/', include('registration.urls')),
-    (r'^userprofile/', include ('userprofile.urls')),
-    (r'^~(?P<username>\w+)/', 'things.views.user_stuff_list'),
+    url(r'^accounts/profile/$', 'django.views.generic.simple.redirect_to', {'url':'/userprofile/',}),
+    url(r'^accounts/register/$', 'registration.views.register', {'profile_callback':create_userprofile,}),
+    url(r'^accounts/', include('registration.urls')),
+    url(r'^userprofile/', include ('userprofile.urls')),
+    url(r'^~(?P<username>\w+)/$', 'userprofile.views.user_details', name="user_details"),
+    url(r'^~(?P<username>\w+)/offers/$', 'things.views.user_offer_list', name="user_offer_list"),
 
     (r'^admin/', include(admin.site.urls)),
 )

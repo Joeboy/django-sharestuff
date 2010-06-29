@@ -6,8 +6,8 @@ class UserProfile(models.Model):
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
-    easting = models.FloatField(blank=True, null=True)
-    northing = models.FloatField(blank=True, null=True)
+#    easting = models.FloatField(blank=True, null=True)
+#    northing = models.FloatField(blank=True, null=True)
     commercial = models.BooleanField(default=False)
 
     def __unicode__(self):

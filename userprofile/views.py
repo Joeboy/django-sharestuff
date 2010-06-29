@@ -8,22 +8,11 @@ from django.template import RequestContext
 from django.forms.models import inlineformset_factory
 
 from userprofile.models import UserProfile
+from userprofile.decorators import userprofile_view
+from userprofile.forms import UserProfileForm
+
 from things.models import Thing, ThingImage
 import math
-
-class UserProfileForm(forms.Form):
-    latitude = forms.FloatField(required=False)
-    longitude = forms.FloatField(required=False)
-
-    def clean(self):
-        if not self.cleaned_data['latitude'] or not self.cleaned_data['longitude']:
-            raise forms.ValidationError("Sorry, you need to enter your location on the map.")
-        if self.cleaned_data['latitude'] < 0.865 or \
-           self.cleaned_data['latitude'] > 1.1 or \
-           self.cleaned_data['longitude'] > 0.04 or \
-           self.cleaned_data['longitude'] < -0.187:
-            raise forms.ValidationError("Sorry, the location you specified isn't in the British Isles. Please try again.")
-        return self.cleaned_data
 
 
 def lat_long_to_easting_northing(lat, lon):
@@ -77,49 +66,58 @@ def lat_long_to_easting_northing(lat, lon):
 
 @login_required
 def home(request):
+    """
+    View that lets a logged in user view and edit their info
+    """
 #    from django.db import connection
 #    cursor = connection.cursor()
 #    cursor.execute("select sqrt(((easting - %f) * (easting - %f)) + ((northing - %f) * (northing - %f))) as distance from userprofile_userprofile" % (2.5,2.5,3,4))
 #    row = cursor.fetchone()
 #    print row
 
+
+#SELECT id, ( 3959 * acos( cos( radians(37) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(-122) ) + sin( radians(37) ) * sin( radians( lat ) ) ) ) AS distance 
+#FROM markers HAVING distance < 25 ORDER BY distance LIMIT 0 , 20;
+
+    userprofile = request.user.get_profile()
+
     if request.method == 'POST':
-        userprofile_form = UserProfileForm(request.POST)
+        userprofile_form = UserProfileForm(request.POST, instance=userprofile)
         if userprofile_form.is_valid():
-            userprofile = request.user.get_profile()
-            latitude = userprofile_form.cleaned_data['latitude']
-            longitude = userprofile_form.cleaned_data['longitude']
-            userprofile.latitude, userprofile.longitude = latitude, longitude
-            userprofile.easting, userprofile.northing = lat_long_to_easting_northing(latitude, longitude)
-            userprofile.save()
+#            latitude = userprofile_form.cleaned_data['latitude']
+#            longitude = userprofile_form.cleaned_data['longitude']
+#            userprofile.latitude, userprofile.longitude = latitude, longitude
+#            userprofile.easting, userprofile.northing = lat_long_to_easting_northing(latitude, longitude)
+            userprofile_form.save()
+            # Email is in the User model, not UserProfile so:
+            userprofile.user.email = userprofile_form.cleaned_data['email']
+            userprofile.user.save()
     else:
-        userprofile = request.user.get_profile()
-        userprofile_form = UserProfileForm(initial={ 'longitude':userprofile.longitude,
-                                                     'latitude':userprofile.latitude,
-                                            })
+        userprofile_form = UserProfileForm(instance=userprofile,
+                                           initial={'email':userprofile.user.email})
 
     return render_to_response('userprofile/userprofile_home.html',
                              {'userprofile_form':userprofile_form,},
                              context_instance=RequestContext(request) )
 
 @login_required
-def my_stuff(request):
+def my_offers(request):
     return render_to_response('userprofile/my_stuff.html', context_instance=RequestContext(request))
 
-class ThingForm(forms.ModelForm):
+class OfferForm(forms.ModelForm):
     class Meta:
         model = Thing
         exclude=('taken_status_other', 'regular', 'donor', 'date_time_added')
 
 
-ThingImageFormSet = inlineformset_factory(Thing, 
+OfferImageFormSet = inlineformset_factory(Thing, 
     ThingImage, 
     can_delete=True,
     extra=1)
 
 
 @login_required
-def edit_thing(request, thing_id=None):
+def edit_offer(request, thing_id=None):
     if request.method == 'POST':
         if thing_id:
             thing = get_object_or_404(Thing, id=thing_id)
@@ -127,11 +125,11 @@ def edit_thing(request, thing_id=None):
         else:
             thing = None
             action="created"
-        form = ThingForm(request.POST, request.FILES, instance=thing)
+        form = OfferForm(request.POST, request.FILES, instance=thing)
         if form.is_valid():
             thing = form.save(commit=False)
             thing.donor = request.user.get_profile()
-            thingimage_formset = ThingImageFormSet(request.POST, request.FILES, instance=thing)
+            thingimage_formset = OfferImageFormSet(request.POST, request.FILES, instance=thing)
             if thingimage_formset.is_valid():
                 thing.save()
                 thingimage_formset.save()  
@@ -141,11 +139,11 @@ def edit_thing(request, thing_id=None):
     else:
         if thing_id:
             thing = get_object_or_404(Thing, id=thing_id)
-            form = ThingForm(instance=thing)
-            thingimage_formset = ThingImageFormSet(instance=thing)
+            form = OfferForm(instance=thing)
+            thingimage_formset = OfferImageFormSet(instance=thing)
         else:
-            form = ThingForm()
-            thingimage_formset = ThingImageFormSet(instance=Thing())
+            form = OfferForm()
+            thingimage_formset = OfferImageFormSet(instance=Thing())
 
     return render_to_response('userprofile/edit_thing.html',
                               {'form': form,
@@ -153,7 +151,10 @@ def edit_thing(request, thing_id=None):
                               context_instance=RequestContext(request))
 
 @login_required
-def delete_thing(request, thing_id):
+def delete_offer(request, thing_id):
+    """
+    Delete an offer
+    """
     if request.GET.get('confirm')=='yes':
         thing = get_object_or_404(Thing, id=thing_id)
         thing.delete()
@@ -165,3 +166,13 @@ def delete_thing(request, thing_id):
     else:
         return render_to_response('userprofile/confirm_delete_thing.html',
                                   context_instance=RequestContext(request))
+
+@userprofile_view
+def user_details(request, userprofile):
+    """
+    Overview of a user
+    """
+    context_instance = RequestContext(request, {'userprofile':userprofile})
+    return render_to_response('userprofile/user_details.html',
+                              context_instance=context_instance)
+
