@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<ul>
+	{% for cat in top_level %}
+		<li><a href="{{cat.get_absolute_url}}">{{cat.name}}</a></li>
+	{% endfor %}
+	</ul>
+{% endblock %}

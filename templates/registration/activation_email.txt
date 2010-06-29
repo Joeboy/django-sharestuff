@@ -1,0 +1,10 @@
+Somebody (probably you) tried to register with the website
+{{site}} using your email address. If this wasn't you, please
+ignore this email.
+
+In order to finish setting up your account, you need to visit
+the following url:
+
+http://blah/accounts/activate/{{activation_key}}/
+
+This activation link will remain valid for {{expiration_days}} days. 

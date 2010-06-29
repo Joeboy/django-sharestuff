@@ -1,0 +1,13 @@
+=====
+TO DO
+=====
+
+ * hListing output
+ * Aggregate / search remote listings
+ * Allow users to set their location by entering their postcode
+ * Stop sucking and write some goddam tests
+ * Rename Thing->Offer
+ * Nicer image uploading / arranging
+ * Prettify stuff
+ * Tagging
+ * Abolish ugly RequestContexts

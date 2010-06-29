@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<h2>{{user.username}}'s stuff:</h2>
+
+{% with user.get_profile.thing_set.live.count as live_things_count %}
+<p>You are currently offering {{ live_things_count }} thing{{ live_things_count|pluralize }}.</p>
+{% endwith %}
+
+<p><a href="/userprofile/add-stuff/">Add a new thing</a></p>
+{% if user.get_profile.thing_set.all %}
+<table>
+<tr>
+<th>Title</th>
+<th>Description</th>
+<th>&nbsp;</th>
+</tr>
+{% for thing in user.get_profile.thing_set.all %}
+<tr>
+<td><p>{{thing.title}}</p></td>
+<td><p>{{thing.description|truncatewords:10}}</p></td>
+<td><a href="/userprofile/edit-stuff/{{thing.id}}/">Edit</a></td>
+<td><a href="/userprofile/delete-stuff/{{thing.id}}/">Delete</a></td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+
+{% endblock %}

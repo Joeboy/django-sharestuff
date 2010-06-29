@@ -1,0 +1,114 @@
+body {
+    font-family:"lucida grande", tahoma, verdana, arial, sans-serif;
+    font-size:13px;
+    margin:0px;
+    padding:0px;
+    color:#333;
+}
+
+#masthead {
+    background-color:#cc8;
+}
+
+#masthead h2 {
+    text-align:right;
+    margin:0px;
+    padding:3px;
+}
+
+#container {
+    margin:12px;
+}
+
+table {
+    border:1px solid #ccc;
+    border-collapse:collapse;
+}
+
+td, th {
+    border:1px solid #ccc;
+    margin:0;
+    padding:3px;
+}
+
+th {
+    text-align:left;
+}
+
+td p {
+    margin:0;
+}
+
+ul.messages {
+    background-color: #ffeedd;
+    border: 1px solid #ccc;
+    margin:2px;
+    padding:5px;
+    max-width: 630px;
+}
+
+ul.messages li {
+    margin-left:15px;
+}
+
+/* Forms markup */
+div.errors {
+    background-color:#ffeedd;
+    border: 1px solid #ccc;
+    margin:2px;
+    padding:5px;
+}
+
+label {
+    display:block;
+    float:left;
+    text-align:right;
+    padding-right:10px;
+    width: 150px;
+    font-weight:bold;
+}
+
+p.form-help {
+    padding-top:1em;
+    clear:left;
+    border-top:1px solid #ddd;
+}
+
+
+form#edit-thing {
+    max-width:630px;
+}
+
+form#edit-thing fieldset {
+    max-width:630px;
+}
+
+form#edit-thing input, form#edit-thing textarea {
+    border: 1px solid #aaa;
+}
+
+form#edit-thing input[type=text], form#edit-thing textarea {
+    width:400px;
+}
+
+form#edit-thing #thing-images input[type=text] {
+    width:230px;
+}
+
+form#edit-thing .thing-image-container {
+    clear:right;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+form#edit-thing .thing-image-img-container {
+    width:90px;
+    height:90px;
+    border:1px solid #ccc;
+    float:right;
+}
+
+form#edit-thing .thing-image-img {
+    width:90px;
+    overflow-y:hidden;
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+{% block meta_title %}<title>ShareStuff - P2P for the real world</title>{% endblock %}
+<link rel="stylesheet" href="/media/css/default.css" type="text/css" />
+<script src="http://code.jquery.com/jquery-1.4.2.min.js" type="text/javascript"></script>
+{% block extrahead %}{% endblock %}
+</head>
+
+<body>
+    <div id="masthead">
+        <h2><a href="/">sharestuff.org.uk</a></h2>
+    </div>
+
+	<div id="container">
+		<div id="menu">
+			{% block menu %}{% endblock %}
+{% if user.is_authenticated %}
+<p>Hello <strong>{{user.username}}</strong></p>
+<p><a href="/userprofile/">Profile</a> | <a href="/userprofile/my-stuff/">Your stuff</a> | <a href="/accounts/logout/">Log out</a></p>
+{% else %}
+<p><a href="/accounts/login/">Log in</a> | <a href="/accounts/register/">Register</a></p>
+{% endif %}
+		</div>
+		{% block content %}{% endblock %}
+	</div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# Django settings for sharestuff project.
+
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
+DEV_SERVER = True
+
+ADMINS = (
+#    ('Your name', 'your@email.com'),
+)
+
+MANAGERS = ADMINS
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'sharestuff',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    }
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# You need to set a random SECRET_KEY for your site. To generate one, run the
+# following command:
+#
+# python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)])'
+
+SECRET_KEY = ''
+
+
