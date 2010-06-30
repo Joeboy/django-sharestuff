@@ -26,11 +26,12 @@
 <p class="form-help">You may upload photos of your stuff below.</p>
 {% for offerimage_form in offerimage_formset.forms %}
     <div class="offer-image-container">
-        <div class="offer-image-img-container">
-            <img class="offer-image-img" src="{{ offerimage_form.initial.image.url }}" alt="{{ offerimage_form.initial.caption }}" />
-        </div>
-    {{ offerimage_form.as_p }}
+        {% if offerimage_form.instance.thumbnail %}
+            <img class="offer-image-img" src="{{ offerimage_form.instance.thumbnail.url}}" alt="{{ offerimage_form.initial.caption }}" />
+        {% endif %}
+        {{ offerimage_form.as_p }}
     </div>
+<div style="clear:both"></div>
 {% endfor %}
 {{ offerimage_formset.management_form }}
 

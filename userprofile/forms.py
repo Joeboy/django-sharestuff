@@ -34,9 +34,7 @@ class OfferForm(forms.ModelForm):
         exclude=('taken_status_other', 'regular', 'donor', 'date_time_added')
 
 
-OfferImageFormSet = inlineformset_factory(Offer, 
-    OfferImage, 
-    can_delete=True,
-    extra=1)
+OfferImageFormSet = inlineformset_factory(Offer, OfferImage, can_delete=True,
+                                          extra=1, exclude=('thumbnail',))
 
 

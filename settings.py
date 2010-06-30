@@ -80,6 +80,7 @@ INSTALLED_APPS = (
     'sharestuff.offers',
     'sharestuff.tests',
     'registration',
+    'sorethumb',
 )
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'

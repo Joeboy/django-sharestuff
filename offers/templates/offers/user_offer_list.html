@@ -8,9 +8,7 @@
       {% if offer.offerimage_set.all %}
         <div class="offer-image-img-container">
           {% for offer_image in offer.offerimage_set.all %}
-            <div class="offer-image-img-inner-container">
-              <img src="{{ offer_image.image.url }}" alt="{{ offer_image.caption }}" />
-            </div>
+              <img src="{{ offer_image.thumbnail.url }}" alt="{{ offer_image.caption }}" />
           {% endfor %}
         </div>
       {% endif %}
@@ -30,7 +28,6 @@
         <a class="url fn nickname" href="{% url user_details userprofile.user.username %}">{{ userprofile.user.username }}</a>
       on <abbr class="dtlisted" title="{{ offer.date_time_added.isoformat }}">{{ offer.date_time_added }}</abbr>
       </p>
-    <div style="clear:right"></div>
     </div>
 {% endfor %}
 {% endblock %}

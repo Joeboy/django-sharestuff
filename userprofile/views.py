@@ -145,8 +145,10 @@ def delete_offer(request, offer_id):
     """
     Delete an offer
     """
+    userprofile = request.user.get_profile()
+    offer = get_object_or_404(Offer, id=offer_id, donor=userprofile)
+
     if request.GET.get('confirm')=='yes':
-        offer = get_object_or_404(Offer, id=offer_id)
         offer.delete()
         messages.success(request, "An item of stuff was deleted.")
         return HttpResponseRedirect(reverse('my_offers'))

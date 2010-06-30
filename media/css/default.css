@@ -101,16 +101,9 @@ form#edit-offer .offer-image-container {
     border-top: 1px solid #ddd;
 }
 
-form#edit-offer .offer-image-img-container {
-    width:90px;
-    height:90px;
-    border:1px solid #ccc;
-    float:right;
-}
-
 form#edit-offer .offer-image-img {
-    width:90px;
-    overflow-y:hidden;
+    display:block;
+    float:right;
 }
 
 .hlisting {
@@ -130,14 +123,22 @@ span.offer.gift {
 }
 
 .hlisting .offer-image-img-container {
-    width:100px;
+    width:90px;
     float:right;
     margin-left: 8px;
 }
 
-.hlisting .offer-image-img-inner-container {
-    width:100px;
-    height:100px;
-    overflow:hidden;
-    border:1px solid #ccc;
+.hlisting .offer-image-img-container img {
+    margin-bottom:6px;
+}
+
+.hlisting .offer-image-img-container img:last-child {
+    margin-bottom:0px;
+}
+
+.hlisting p.lister {
+    clear:right;
+    text-align:right;
+    padding-top:18px;
+    margin-bottom:3px;
 }
