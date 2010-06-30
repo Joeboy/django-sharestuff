@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     url(r'^userprofile/', include ('userprofile.urls')),
 
     url(r'^~(?P<username>\w+)/$', 'userprofile.views.user_details', name="user_details"),
-    url(r'^~(?P<username>\w+)/offers/$', 'things.views.user_offer_list', name="user_offer_list"),
+    url(r'^~(?P<username>\w+)/offers/$', 'offers.views.user_offer_list', name="user_offer_list"),
 
     (r'^admin/', include(admin.site.urls)),
 )

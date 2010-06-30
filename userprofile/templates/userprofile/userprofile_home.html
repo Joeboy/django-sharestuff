@@ -19,9 +19,11 @@
 </ul>
 {% endif %}
 
-{% with user.get_profile.thing_set.live.count as live_thing_count %}
-    <p>You are currently offering {{ live_thing_count }} item{{ live_thing_count|pluralize }}. <a href="{% url my_offers %}">View/edit your stuff</a></p>
+{% with user.get_profile.offer_set.live.count as live_offer_count %}
+    <p>You are currently offering {{ live_offer_count }} item{{ live_offer_count|pluralize }}. <a href="{% url my_offers %}">View/edit your offers</a>.</p>
 {% endwith %}
+
+<p>View your <a href="{% url user_details user.username %}">public profile</a>.</p>
 
 <h4>Contact details</h4>
 
@@ -30,6 +32,7 @@
 {% endif %}
 
 <form action="" method="post" id="userprofile_form">{% csrf_token %}
+  <fieldset>
     <p><label for="id_email">Email:</label>{{ userprofile_form.email }}</p>
     <p><label for="id_phone_number">Phone number:</label>{{ userprofile_form.phone_number }}</p>
 
@@ -46,6 +49,7 @@
     </div>
 
     <div id="map_canvas" style="width: 300px; height: 300px"></div>
+  </fieldset>
 
 <input type="submit" value="Update">
 </form>

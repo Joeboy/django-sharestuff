@@ -3,12 +3,12 @@
 {% block content %}
 <h2>{{ userprofile.user.username }}'s offers</h2>
 
-{% for offer in userprofile.thing_set.live %}
+{% for offer in userprofile.offer_set.live %}
     <div class="hlisting">
-      {% if offer.thingimage_set.all %}
-        <div class="thing-image-img-container">
-          {% for offer_image in offer.thingimage_set.all %}
-            <div class="thing-image-img-inner-container">
+      {% if offer.offerimage_set.all %}
+        <div class="offer-image-img-container">
+          {% for offer_image in offer.offerimage_set.all %}
+            <div class="offer-image-img-inner-container">
               <img src="{{ offer_image.image.url }}" alt="{{ offer_image.caption }}" />
             </div>
           {% endfor %}

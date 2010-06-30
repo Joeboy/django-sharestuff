@@ -31,14 +31,12 @@ Longer term plans
  * Think further about how users will contact each other once one of them has
    identified something they want
  * Wanted listings
- * Other implementations
 
 Status
 ======
 
 Still lots to do before it's actually useful. So far it's possible for users to
-register and enter offer details, but serving and searching those listings is
-still TODO.
+register and enter offer details, but searching those listings is still TODO.
 
 Getting it working
 ==================

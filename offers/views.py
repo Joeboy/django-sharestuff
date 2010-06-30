@@ -7,6 +7,6 @@ from userprofile.decorators import userprofile_view
 def user_offer_list(request, userprofile=None):
     context_instance=RequestContext(request, {'userprofile':userprofile} )
 
-    return render_to_response('things/user_stuff_list.html',
+    return render_to_response('offers/user_offer_list.html',
                               context_instance=context_instance)
 

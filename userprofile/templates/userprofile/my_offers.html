@@ -12,24 +12,24 @@
 
 <h2>{{user.username}}'s offers:</h2>
 
-{% with user.get_profile.thing_set.live.count as live_things_count %}
-<p>You are currently offering {{ live_things_count }} item{{ live_things_count|pluralize }}.</p>
+{% with user.get_profile.offer_set.live.count as live_offers_count %}
+<p>You are currently offering {{ live_offers_count }} item{{ live_offers_count|pluralize }}.</p>
 {% endwith %}
 
 <p><a href="{% url add_offer %}">Add a new offer</a></p>
-{% if user.get_profile.thing_set.all %}
+{% if user.get_profile.offer_set.all %}
 <table>
 <tr>
 <th>Title</th>
 <th>Description</th>
 <th>&nbsp;</th>
 </tr>
-{% for thing in user.get_profile.thing_set.all %}
+{% for offer in user.get_profile.offer_set.all %}
 <tr>
-<td><p>{{thing.title}}</p></td>
-<td><p>{{thing.description|truncatewords:10}}</p></td>
-<td><a href="{% url edit_offer thing.id %}">Edit</a></td>
-<td><a href="{% url delete_offer thing.id %}">Delete</a></td>
+<td><p>{{offer.title}}</p></td>
+<td><p>{{offer.description|truncatewords:10}}</p></td>
+<td><a href="{% url edit_offer offer.id %}">Edit</a></td>
+<td><a href="{% url delete_offer offer.id %}">Delete</a></td>
 </tr>
 {% endfor %}
 </table>

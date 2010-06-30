@@ -12,7 +12,7 @@ from userprofile.decorators import userprofile_view
 from userprofile.forms import UserProfileForm
 from userprofile.forms import OfferForm, OfferImageFormSet
 
-from things.models import Thing, ThingImage
+from offers.models import Offer, OfferImage
 import math
 
 
@@ -100,61 +100,61 @@ def home(request):
 
 @login_required
 def my_offers(request):
-    return render_to_response('userprofile/my_stuff.html', context_instance=RequestContext(request))
+    return render_to_response('userprofile/my_offers.html', context_instance=RequestContext(request))
 
 @login_required
-def edit_offer(request, thing_id=None):
+def edit_offer(request, offer_id=None):
     """
     Form that lets a user create or edit an offer
     """
     if request.method == 'POST':
         userprofile = request.user.get_profile()
-        if thing_id:
-            thing = get_object_or_404(Thing, id=thing_id, donor=userprofile)
+        if offer_id:
+            offer = get_object_or_404(Offer, id=offer_id, donor=userprofile)
             action="edited"
         else:
-            thing = None
+            offer = None
             action="created"
-        form = OfferForm(request.POST, request.FILES, instance=thing)
+        form = OfferForm(request.POST, request.FILES, instance=offer)
         if form.is_valid():
-            thing = form.save(commit=False)
-            thing.donor = userprofile
-            thingimage_formset = OfferImageFormSet(request.POST, request.FILES, instance=thing)
-            if thingimage_formset.is_valid():
-                thing.save()
-                thingimage_formset.save()  
+            offer = form.save(commit=False)
+            offer.donor = userprofile
+            offerimage_formset = OfferImageFormSet(request.POST, request.FILES, instance=offer)
+            if offerimage_formset.is_valid():
+                offer.save()
+                offerimage_formset.save()  
                 messages.success(request, "An item was successfully %s." % action)
 
             return HttpResponseRedirect(reverse('my_offers'))
     else:
-        if thing_id:
-            thing = get_object_or_404(Thing, id=thing_id)
-            form = OfferForm(instance=thing)
-            thingimage_formset = OfferImageFormSet(instance=thing)
+        if offer_id:
+            offer = get_object_or_404(Offer, id=offer_id)
+            form = OfferForm(instance=offer)
+            offerimage_formset = OfferImageFormSet(instance=offer)
         else:
             form = OfferForm()
-            thingimage_formset = OfferImageFormSet(instance=Thing())
+            offerimage_formset = OfferImageFormSet(instance=Offer())
 
-    return render_to_response('userprofile/edit_thing.html',
+    return render_to_response('userprofile/edit_offer.html',
                               {'form': form,
-                               'thingimage_formset':thingimage_formset},
+                               'offerimage_formset':offerimage_formset},
                               context_instance=RequestContext(request))
 
 @login_required
-def delete_offer(request, thing_id):
+def delete_offer(request, offer_id):
     """
     Delete an offer
     """
     if request.GET.get('confirm')=='yes':
-        thing = get_object_or_404(Thing, id=thing_id)
-        thing.delete()
+        offer = get_object_or_404(Offer, id=offer_id)
+        offer.delete()
         messages.success(request, "An item of stuff was deleted.")
         return HttpResponseRedirect(reverse('my_offers'))
     elif request.GET.get('confirm')=='no':
         messages.success(request, "Deletion of stuff cancelled.")
         return HttpResponseRedirect(reverse('my_offers'))
     else:
-        return render_to_response('userprofile/confirm_delete_thing.html',
+        return render_to_response('userprofile/confirm_delete_offer.html',
                                   context_instance=RequestContext(request))
 
 @userprofile_view

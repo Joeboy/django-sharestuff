@@ -1,6 +1,6 @@
 from django import forms
 from django.forms.models import inlineformset_factory
-from things.models import Thing, ThingImage
+from offers.models import Offer, OfferImage
 from userprofile.models import UserProfile
 
 class UserProfileForm(forms.ModelForm):
@@ -30,12 +30,12 @@ class OfferForm(forms.ModelForm):
     A form that allows a user to add/edit an offer
     """
     class Meta:
-        model = Thing
+        model = Offer
         exclude=('taken_status_other', 'regular', 'donor', 'date_time_added')
 
 
-OfferImageFormSet = inlineformset_factory(Thing, 
-    ThingImage, 
+OfferImageFormSet = inlineformset_factory(Offer, 
+    OfferImage, 
     can_delete=True,
     extra=1)
 

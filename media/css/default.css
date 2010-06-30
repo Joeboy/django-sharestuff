@@ -75,40 +75,40 @@ p.form-help {
 }
 
 
-form#edit-thing {
+form#edit-offer {
     max-width:630px;
 }
 
-form#edit-thing fieldset {
+form#edit-offer fieldset {
     max-width:630px;
 }
 
-form#edit-thing input, form#edit-thing textarea {
+form#edit-offer input, form#edit-offer textarea {
     border: 1px solid #aaa;
 }
 
-form#edit-thing input[type=text], form#edit-thing textarea {
+form#edit-offer input[type=text], form#edit-offer textarea {
     width:400px;
 }
 
-form#edit-thing #thing-images input[type=text] {
+form#edit-offer #offer-images input[type=text] {
     width:230px;
 }
 
-form#edit-thing .thing-image-container {
+form#edit-offer .offer-image-container {
     clear:right;
     padding-top: 10px;
     border-top: 1px solid #ddd;
 }
 
-form#edit-thing .thing-image-img-container {
+form#edit-offer .offer-image-img-container {
     width:90px;
     height:90px;
     border:1px solid #ccc;
     float:right;
 }
 
-form#edit-thing .thing-image-img {
+form#edit-offer .offer-image-img {
     width:90px;
     overflow-y:hidden;
 }
@@ -129,13 +129,13 @@ span.offer.gift {
     display:none;
 }
 
-.hlisting .thing-image-img-container {
+.hlisting .offer-image-img-container {
     width:100px;
     float:right;
     margin-left: 8px;
 }
 
-.hlisting .thing-image-img-inner-container {
+.hlisting .offer-image-img-inner-container {
     width:100px;
     height:100px;
     overflow:hidden;

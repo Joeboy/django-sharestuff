@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% if form.has_errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
+<h2>Login</h2>
+
+<p>Please enter your username and password.</p>
+{{ form.errors }}
 
 <form method="post" action=".">{% csrf_token %}
 <table>

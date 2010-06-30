@@ -1,9 +1,9 @@
 from django.db import models
 from userprofile.models import UserProfile
-from things.managers import ThingManager
+from offers.managers import OfferManager
 import datetime
 
-class Thing(models.Model):
+class Offer(models.Model):
     "An item of stuff to get rid of"
     
     title = models.CharField(max_length=255)
@@ -19,7 +19,7 @@ class Thing(models.Model):
     donor = models.ForeignKey(UserProfile)
     
     # Managers
-    objects = ThingManager()
+    objects = OfferManager()
     
     class Meta:
         get_latest_by = 'date_time_added'
@@ -32,10 +32,10 @@ class Thing(models.Model):
     def __unicode__(self):
         return u'%s' % (self.title)
 
-class ThingImage(models.Model):
+class OfferImage(models.Model):
     caption = models.CharField(max_length=100)
-    image = models.ImageField(upload_to="things/")
-    thing = models.ForeignKey(Thing)
+    image = models.ImageField(upload_to="offers/")
+    offer = models.ForeignKey(Offer)
 
     def __unicode__(self):
         return self.caption

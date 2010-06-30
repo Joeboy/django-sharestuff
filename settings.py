@@ -77,7 +77,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.admin',
     'sharestuff.userprofile',
-    'sharestuff.things',
+    'sharestuff.offers',
     'sharestuff.tests',
     'registration',
 )

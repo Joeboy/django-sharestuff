@@ -2,7 +2,7 @@
 
 {% block content %}
 <h2>Offer details</h2>
-<form enctype="multipart/form-data" method="post" id="edit-thing" action="">{% csrf_token %}
+<form enctype="multipart/form-data" method="post" id="edit-offer" action="">{% csrf_token %}
 {% if form.errors %}
     <div class="errors">
         <p>Please correct the following errors:</p>
@@ -22,17 +22,17 @@
 <p><label for="id_taken_status_donor">Taken:</label>{{ form.taken_status_donor }}</p>
 </fieldset>
 
-<fieldset id="thing-images">
+<fieldset id="offer-images">
 <p class="form-help">You may upload photos of your stuff below.</p>
-{% for thingimage_form in thingimage_formset.forms %}
-    <div class="thing-image-container">
-        <div class="thing-image-img-container">
-            <img class="thing-image-img" src="{{ thingimage_form.initial.image.url }}" alt="{{ thingimage_form.initial.caption }}" />
+{% for offerimage_form in offerimage_formset.forms %}
+    <div class="offer-image-container">
+        <div class="offer-image-img-container">
+            <img class="offer-image-img" src="{{ offerimage_form.initial.image.url }}" alt="{{ offerimage_form.initial.caption }}" />
         </div>
-    {{ thingimage_form.as_p }}
+    {{ offerimage_form.as_p }}
     </div>
 {% endfor %}
-{{ thingimage_formset.management_form }}
+{{ offerimage_formset.management_form }}
 
 </fieldset>
 

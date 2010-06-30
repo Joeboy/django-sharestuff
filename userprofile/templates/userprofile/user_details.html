@@ -12,8 +12,8 @@
 
 <h2>{{user.username}}</h2>
 
-{% with user.get_profile.thing_set.live.count as live_things_count %}
-<p>Currently has <a href="{% url user_offer_list user.username%}">{{ live_things_count }} offer{{ live_things_count|pluralize }}</a>.</p>
+{% with user.get_profile.offer_set.live.count as live_offers_count %}
+<p>Currently has <a href="{% url user_offer_list user.username%}">{{ live_offers_count }} offer{{ live_offers_count|pluralize }}</a>.</p>
 {% endwith %}
 
 {% endblock %}
