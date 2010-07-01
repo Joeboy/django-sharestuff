@@ -73,7 +73,7 @@ class RoundedCornersThumbnail(DjangoThumbnail):
     format = 'png'
     filters = [SquareFilter(),
                ThumbnailFilter(90, 90),
-               RoundedCornerFilter(7, border='#333'),]
+               RoundedCornerFilter(7, border='#aaa'),]
 
     class Settings:
         """
