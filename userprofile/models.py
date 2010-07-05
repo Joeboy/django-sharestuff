@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.conf import settings
      
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True)
@@ -8,7 +10,14 @@ class UserProfile(models.Model):
     longitude = models.FloatField(blank=True, null=True)
 #    easting = models.FloatField(blank=True, null=True)
 #    northing = models.FloatField(blank=True, null=True)
-    commercial = models.BooleanField(default=False)
+#    commercial = models.BooleanField(default=False)
+
+    def get_full_url(self):
+        """
+        Return a complete URL (http://...) for the user's profile page
+        """
+        rel_url = reverse('user_offer_list', kwargs={'username':self.user.username})
+        return 'http://%s%s' % (settings.SITE_URL, rel_url)
 
     def __unicode__(self):
         return "%s's UserProfile" % self.user.username

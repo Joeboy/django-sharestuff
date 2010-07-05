@@ -143,6 +143,10 @@ span.offer.gift {
     margin-bottom:3px;
 }
 
+.hlisting .geo {
+    display:none;
+}
+
 #map_canvas {
     border:1px solid #888;
 }

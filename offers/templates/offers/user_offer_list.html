@@ -5,28 +5,28 @@
 
 {% for offer in userprofile.offer_set.live %}
     <div class="hlisting">
-      {% if offer.offerimage_set.all %}
-        <div class="offer-image-img-container">
-          {% for offer_image in offer.offerimage_set.all %}
-              <img src="{{ offer_image.thumbnail.url }}" alt="{{ offer_image.caption }}" />
-          {% endfor %}
-        </div>
-      {% endif %}
-
-
-      <div class="item">
-        <h4 class="fn">{{ offer.title }}</h4>
+      <div class="item offer rent">
+          {% if offer.offerimage_set.all %}
+            <div class="offer-image-img-container">
+              {% for offer_image in offer.offerimage_set.all %}
+                  <img class="photo" src="{{ offer_image.thumbnail.url }}" alt="{{ offer_image.caption }}" />
+              {% endfor %}
+            </div>
+          {% endif %}
+          <h4 class="fn">{{ offer.title }}</h4>
+          <p class="description">
+            {{ offer.description }}
+          </p>
       </div>
 
-      <div class="offer gift"></div>
-
-      <p class="description">
-          {{ offer.description }}
-      </p>
 
       <p class="lister vcard">Listed by
-        <a class="url fn nickname" href="{% url user_details userprofile.user.username %}">{{ userprofile.user.username }}</a>
-      on <abbr class="dtlisted" title="{{ offer.date_time_added.isoformat }}">{{ offer.date_time_added }}</abbr>
+        <a class="url fn nickname" href="{{ userprofile.get_full_url }}">{{ userprofile.user.username }}</a>
+        on <abbr class="dtlisted" title="{{ offer.date_time_added.isoformat }}">{{ offer.date_time_added }}</abbr>
+        <span class="geo">
+          <abbr class="latitude">{{ userprofile.latitude }}</abbr> 
+          <abbr class="longitude">{{ userprofile.longitude }}</abbr>
+        </span>
       </p>
     </div>
 {% endfor %}

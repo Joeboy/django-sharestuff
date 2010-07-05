@@ -76,11 +76,13 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.admin',
-    'sharestuff.userprofile',
-    'sharestuff.offers',
-    'sharestuff.tests',
     'registration',
     'sorethumb',
+    'django_coverage',
+    'userprofile',
+    'offers',
+    'sharestuff.tests',
+    'bucket',
 )
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
@@ -88,7 +90,14 @@ AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
 # Time that account activation keys will remain active:
 ACCOUNT_ACTIVATION_DAYS = 3
 
+SITE_URL = 'localhost:8000'
+
+COVERAGE_CUSTOM_REPORTS = True
+
+COVERAGE_REPORT_HTML_OUTPUT_DIR = os.path.join(PROJECT_PATH, 'coverage')
+
 try:
     from localsettings import *
 except ImportError:
     pass
+
