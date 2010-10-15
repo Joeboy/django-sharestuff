@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{action}} user</h2>
+    <form method="post" action="">
+
+    {{ form.errors }}
+
+    <h4><label for="id_username">{{form.username.label}}</label></h4>
+    <p>Enter the username the group will use to log in (eg. 'nautia', 'cornerstone').</p>
+    <p>{{form.username}}</p>
+
+    <h4><label for="id_name">{{form.name.label}}</label></h4>
+    <p>Enter the name that will be displayed for the group (eg. 'Nautia Housing Co-op').</p>
+    <p>{{form.name}}</p>
+
+    <h4><label for="id_email">{{form.email.label}}</label></h4>
+    <p>{{form.email}}</p>
+
+    <h4><label for="id_phone_number">{{form.phone_number.label}}</label></h4>
+    <p>{{form.phone_number}}</p>
+
+    <h4><label for="id_info">{{form.info.label}}</label></h4>
+    <p>Enter some brief information about the group.</p>
+    <p>{{form.info}}</p>
+
+    <h4><label for="id_is_staff">{{form.is_staff.label}}</label></h4>
+    <p>Check this box if the group will be able to log in and administrate this website.</p>
+    <p>{{form.is_staff}}</p>
+
+    <h4><label for="id_password">{{form.password.label}}</label></h4>
+    <p>Leave this box and the 'confirm password' box blank to leave the group's password unchanged.</p>
+    <p>{{form.password}}</p>
+
+    <h4><label for="id_confirm_password">{{form.confirm_password.label}}</label></h4>
+    <p>{{form.confirm_password}}</p>
+
+    <input type="submit" value="Submit" />
+    </form>
+{% endblock %}

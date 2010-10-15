@@ -1,0 +1,30 @@
+ADMINS = (
+    ('Your name', 'your@email.com'),
+)
+
+MANAGERS = ADMINS
+
+#EMAIL_HOST_USER = 'joe'
+
+DEBUG = True
+TEMPLATE_DEBUG=DEBUG
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'goingspare.sqlite',
+        'USER': 'goingspare',
+        'PASSWORD': 'jah5paiK',
+    }
+}
+
+# You need to set a random SECRET_KEY for your site. To generate one, run the
+# following command:
+#
+# python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)])'
+
+SECRET_KEY = ''
+
+

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Users</h2>
+    <p>This page is temporary and will disappear before the site is launched.</p>
+    {% for userprofile in userprofiles %}
+        <h4><a href="{% url view-userprofile userprofile.id %}">{{ userprofile.get_best_name }}</a></h4>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block extrahead %}
+{{ block.super }}
+    {{ userprofile_form.media }}
+{% endblock %}
+
+{% block content %}
+<h2>{{ user.get_profile.get_best_name }}'s profile</h2>
+<p>You don't have to tell us any of the following information. It's up to you whether you want people to know this stuff.</p>
+{{ userprofile_form.errors }}
+<form action="" method="post" id="userprofile_form">
+    <p>{{ userprofile_form.name.label }}:
+    {{ userprofile_form.name }}</p>
+
+    <p>{{ userprofile_form.phone_number.label }}:
+    {{ userprofile_form.phone_number }}</p>
+
+    <p>{{ userprofile_form.info.label }}:</p>
+    <p>{{ userprofile_form.info }}</p>
+
+    <p>{{ userprofile_form.notify_following.label }}:</p>
+    <p>{{ userprofile_form.notify_following }}</p>
+
+    <p>{{ userprofile_form.confirm_following.label }}:</p>
+    <p>{{ userprofile_form.confirm_following }}</p>
+
+    <p>{{ userprofile_form.public_offers.label }}:</p>
+    <p>{{ userprofile_form.public_offers }}</p>
+
+    <h4>Location</h4>
+    {% if userprofile_form.initial.latitude %}
+    <p>The map below indicates your location. To change your location drag the marker to your preferred location, or type your postcode into the postcode box.</p>
+    {% else %}
+    <p>Please place a marker on the map and drag it to your location, or type your postcode into the postcode box.</p>
+    {% endif %}
+
+    <p id="location-intro">Please enter your latitude and longitude below. Note that you are seeing a fallback, low-tech version of this page. If you were using a recent browser with javascript activated you would be able to set your location using a marker on a map, and we might be able to guess your location automatically.</p>
+
+    <p>{{ userprofile_form.latitude.label }}:
+    {{ userprofile_form.latitude }}</p>
+    <p>{{ userprofile_form.longitude.label }}:
+    {{ userprofile_form.longitude }}</p>
+
+    <input type="submit" value="Update my details" />
+</form>
+{% endblock %}

@@ -1,0 +1,11 @@
+Somebody (probably you) tried to register with the website
+{{site}} using your email address. If this wasn't you, please
+accept our apologies and ignore this email.
+
+To complete your registration, please visit the following url:
+
+http://{{site.domain}}/user/activate/{{ activation_key }}/
+
+Thanks.
+
+This activation link will remain valid for {{expiration_days}} days. 

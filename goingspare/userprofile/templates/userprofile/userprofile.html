@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{userprofile.get_best_name}}</h2>
+{% if userprofile.info %}{{userprofile.info|safe}}{% endif %}
+
+{% if userprofile.offer_set.all %}
+<h3>Offers:</h3>
+    {% for offer in userprofile.offer_set.all %}
+        <h4>{{offer.title}}</h4>
+        {{offer.description|truncatewords:10}}
+    {% endfor %}
+{% else %}
+    <h3>No offers</h3>
+{% endif %}
+
+{% if userprofile in user.get_profile.watched_users.all %}
+<p><a href="{% url unwatch-user userprofile.id %}">Stop watching this user's offers</a></p>
+{% else %}
+<p><a href="{% url watch-user userprofile.id %}">Watch this user's offers</a></p>
+{% endif %}
+
+{% endblock %}

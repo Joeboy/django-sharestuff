@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ user.get_profile.get_best_name }}'s offers:</h2>
+<p><a href="{% url edit-offer %}">Add a new offer</a></p>
+{% if user.get_profile.localoffer_set.all %}
+<table>
+<tr>
+<th>Title</th>
+<th>Description</th>
+<th>&nbsp;</th>
+</tr>
+{% for offer in user.get_profile.localoffer_set.all %}
+<tr>
+<td><p>{{offer.title}}</p></td>
+<td><p>{{offer.description|truncatewords:10}}</p></td>
+<td><a href="{% url edit-offer offer.id %}">Edit</a></td>
+<td><a href="{% url delete-offer offer.id %}">Delete</a></td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+{% block meta_title %}<title>Going spare? Declutter your life</title>{% endblock %}
+<link rel="stylesheet" href="/media/default.css" type="text/css" />
+<script src="/media/js/jquery-1.4.2.js" type="text/javascript"></script>
+{% block extrahead %}{% endblock %}
+</head>
+
+<body>
+    <div id="masthead">
+        <h2><a href="{% url homepage %}">Going Spare</a></h2>
+    </div>
+
+	<div id="container">
+		<div id="menu">
+			{% block menu %}{% endblock %}
+{% if user.is_authenticated %}
+<p>Hello <strong>{{user.get_profile.get_best_name}}</strong></p>
+<p><a href="{% url edit-userprofile %}">Edit your profile</a> | <a href="{% url my-offers %}">Edit your offers</a> | <a href="{% url user-list %}">Other people</a> | <a href="{% url others-offers %}">Other people's offers</a> | <a href="/user/change-password/">Change password</a> | <a href="/user/logout/">Log out</a></p>
+{% else %}
+<p><a href="/user/login/">Log in</a> | <a href="/user/register/">Register</a></p>
+{% endif %}
+		</div>
+        {% if messages %}
+        <ul id="messages">
+            {% for message in messages %}
+                <li>{{message}}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+		{% block content %}{% endblock %}
+	</div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block extrahead %}{{block.super}}
+{{form.media}}
+{% endblock %}
+
+
+{% block content %}
+<form method="post" action="">
+{{form.errors}}
+
+<h4><label for="id_title}}">{{form.title.label}}</label></h4>
+<p>Enter a brief description of your offer (eg. "Woman's racing bike", "Inkjet printer"</p>
+<p>{{form.title}}</p>
+<h4><label for="id_description}}">{{form.description.label}}</label></h4>
+<p>Enter any further information about your offer</p>
+<p>{{form.description}}</p>
+<p><label for="id_live_status}}">{{form.live_status.label}}</label>: {{form.live_status}}</p>
+<input type="submit" />
+</form>
+{% endblock %}

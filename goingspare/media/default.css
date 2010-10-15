@@ -1,0 +1,42 @@
+body {
+    font-family:"lucida grande", tahoma, verdana, arial, sans-serif;
+    margin:0px;
+    padding:0px;
+}
+
+#masthead {
+    background-color:#cc8;
+}
+
+#masthead h2 {
+    text-align:right;
+    margin:0px;
+    padding:3px;
+}
+
+#container {
+    margin:12px;
+}
+
+table {
+    border:1px solid #ccc;
+    border-collapse:collapse;
+}
+
+td, th {
+    border:1px solid #ccc;
+margin:0;
+padding:3px;
+}
+
+th {
+    text-align:left;
+}
+
+td p {
+    margin:0;
+}
+
+.geo {
+    display:none;
+}

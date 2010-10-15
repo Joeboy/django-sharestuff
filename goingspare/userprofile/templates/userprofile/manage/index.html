@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Groups</h2>
+    <p><a href="/user/manage/add/">Add a new group</a></p>
+    {% if userprofiles %}
+        <table>
+        <tr>
+        <th>Name</th>
+        <th>Edit</th>
+        <th>Delete</th>
+        </tr>
+        {% for userprofile in userprofiles %}
+            <tr>
+                <td><a href="{{userprofile.get_profile_url}}">{{userprofile.name}}</a></td>
+                <td><a href="{{userprofile.get_manage_url}}">Edit</a></td>
+                <td><a href="{{userprofile.get_delete_url}}">Delete</a></td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% endif %}
+{% endblock %}
