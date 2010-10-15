@@ -4,9 +4,9 @@
 <h2>{{userprofile.get_best_name}}</h2>
 {% if userprofile.info %}{{userprofile.info|safe}}{% endif %}
 
-{% if userprofile.offer_set.all %}
+{% if userprofile.localoffer_set.all %}
 <h3>Offers:</h3>
-    {% for offer in userprofile.offer_set.all %}
+    {% for offer in userprofile.localoffer_set.all %}
         <h4>{{offer.title}}</h4>
         {{offer.description|truncatewords:10}}
     {% endfor %}

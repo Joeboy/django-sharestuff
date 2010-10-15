@@ -3,6 +3,8 @@ from userprofile.models import UserProfile
 import datetime
 import random
 
+B36_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
+
 class OfferCategory(models.Model):
     title = models.CharField(max_length=255)
     parent=models.ForeignKey('self', blank=True, null=True, related_name='child')
@@ -43,7 +45,6 @@ class OfferManager(models.Manager):
         """
         return self.filter(live_status=True)
 
-B36_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
 
 class LocalOffer(BaseOffer):
     """
@@ -61,13 +62,13 @@ class LocalOffer(BaseOffer):
     live_status = models.BooleanField(default=True)
     donor = models.ForeignKey(UserProfile)
     # A slightly obfuscated id for public use:
-    url_hash = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    hash = models.CharField(max_length=25, unique=True, db_index=True, blank=True)
 
-    manager = OfferManager()
+    objects = OfferManager()
 
     def save(self, *args, **kwargs):
-        if not self.url_hash:
-            self.url_hash = self.get_random_hash()
+        if not self.hash:
+            self.hash = self.get_random_hash()
         super(LocalOffer, self).save(*args, **kwargs)
 
 

@@ -129,11 +129,13 @@ def offer_category_tree(request, cat_id):
 @login_required
 def others_offers(request):
     others = request.user.get_profile().watched_users.all()
-    offer_sets = [o.offer_set.all() for o in others]
+    offer_sets = [o.localoffer_set.all() for o in others]
     offers = chain(*offer_sets)
     return render_to_response_context(request,
                                       'offers/others_offers.html',
                                       {'offers':offers})
 
 def contact_re_offer(request, offer_hash):
-    raise NotImplementedError
+    offer = get_object_or_404(LocalOffer, hash=offer_hash)
+    print offer.donor.user.email
+    
