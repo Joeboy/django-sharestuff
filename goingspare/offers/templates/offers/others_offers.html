@@ -6,7 +6,9 @@
 {% if offers %}
     {% for offer in offers %}
         {{ offer.title }}
-        <p>Offered by <strong>{{ offer.donor.get_best_name }}</strong>. <a href="{% url contact-re-offer offer.hash %}">Contact them about this offer</a></p>
+        <p>Offered by <strong>{{ offer.donor.get_best_name }}</strong>. <a href="{% url offer-contact offer.hash %}">Contact them about this offer</a></p>
+{% if offer.distance %}<p>Distance: {{ offer.distance|floatformat:1 }}km</p>{% endif %}
+        <hr />
     {% endfor %}
 {% else %}
     <p>No offers found</p>

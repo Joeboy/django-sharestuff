@@ -10,10 +10,12 @@ from django.forms.fields import Field, EMPTY_VALUES
 from django.shortcuts import get_object_or_404
 from offers.models import LocalOffer, OfferCategory
 from django.core.exceptions import PermissionDenied
+from django.db import connection
 from userprofile.models import UserProfile
 
 from goingspare.utils import render_to_response_context
 from goingspare.offers.decorators import user_offer
+from notifications.models import Notification
 
 
 @login_required
@@ -54,11 +56,11 @@ class RawModelChoiceField(forms.ModelChoiceField):
 
 
 class OfferForm(forms.ModelForm):
-#    skill_category=RawModelChoiceField(queryset=SkillCategory.objects.all(), widget=CategoryWidget)
+#    category=RawModelChoiceField(queryset=OfferCategory.objects.all(), widget=CategoryWidget)
 
     class Meta:
         model = LocalOffer
-        exclude = ('donor', 'date_time_added', 'offer_category')
+        exclude = ('donor', 'date_time_added', 'offer_category', 'hash')
 
 
 @user_offer
@@ -66,17 +68,22 @@ def edit_offer(request, offer=None):
     """
     Edit or create a user's offer
     """
+    userp = request.user.get_profile()
     if request.method == 'POST':
         form = OfferForm(request.POST, instance=offer)
         if form.is_valid():
             offer = OfferForm.save(form, commit=False)
-            offer.donor = request.user.get_profile()
+            offer.donor = userp
             offer.save()
             action = offer and 'edited' or 'created'
             request.user.message_set.create(message="A offer was successfully %s." % action)
             return HttpResponseRedirect(reverse('my-offers'))
     else:
-        form = OfferForm(instance=offer)
+        if offer is None:
+            form = OfferForm(initial={'latitude':userp.latitude,
+                                      'longitude':userp.longitude})
+        else:
+            form = OfferForm(instance=offer)
 
     return render_to_response_context(request, 'offers/edit_offer.html', {'form': form})
 
@@ -126,16 +133,63 @@ def offer_category_tree(request, cat_id):
     simplejson.dump(tree, response, ensure_ascii=False)
     return response
 
+
 @login_required
 def others_offers(request):
-    others = request.user.get_profile().watched_users.all()
-    offer_sets = [o.localoffer_set.all() for o in others]
-    offers = chain(*offer_sets)
+    """
+    List of offers from watched users
+    """
+    cursor = connection.cursor()
+    userp = request.user.get_profile()
+    sql = """
+SELECT title,
+       donor_id,
+       hash,
+       earth_distance(ll_to_earth('%s', '%s'), ll_to_earth(latitude, longitude))/1000
+FROM offers_localoffer where donor_id in (select to_userprofile_id from userprofile_userprofile_watched_users where from_userprofile_id=%s)
+    """
+    cursor.execute(sql, (userp.latitude, userp.longitude, userp.id))
+    offers = [{'title':row[0], 'donor':UserProfile.objects.get(id=row[1]), 'hash':row[2], 'distance':row[3]} for row in cursor.fetchall()]
     return render_to_response_context(request,
                                       'offers/others_offers.html',
                                       {'offers':offers})
 
-def contact_re_offer(request, offer_hash):
+def view_offer(request, offer_hash):
     offer = get_object_or_404(LocalOffer, hash=offer_hash)
-    print offer.donor.user.email
-    
+    return render_to_response_context(request,
+                                      'offers/offer.html',
+                                      {'offer':offer})
+
+class OfferContactForm(forms.Form):
+    message = forms.CharField(widget=forms.Textarea)
+
+MESSAGE_TEMPLATE = """
+<p>User <a href="%s">%s</a> contacted you about your offer <a href="%s">%s</a>:</p>
+
+%s
+"""
+def offer_contact(request, offer_hash):
+    offer = get_object_or_404(LocalOffer, hash=offer_hash)
+    if request.POST:
+        form = OfferContactForm(request.POST)
+        if form.is_valid():
+            sender = request.user.get_profile()
+            sender_url = sender.get_absolute_url()
+            message = MESSAGE_TEMPLATE % (sender_url,
+                                          sender.get_best_name(),
+                                          offer.get_absolute_url(),
+                                          offer.title,
+                                          form.cleaned_data['message'])
+            n = Notification.objects.create(to_user=offer.donor,
+                                            message=message)
+            return HttpResponseRedirect(reverse('offer-contact-sent'))
+    else:
+        form = OfferContactForm()
+
+    return render_to_response_context(request,
+                                      'offers/contact_form.html',
+                                      {'offer_contact_form':form})
+
+def offer_contact_sent(request):
+    return render_to_response_context(request,
+                                      'offers/offer_contact_sent.html')

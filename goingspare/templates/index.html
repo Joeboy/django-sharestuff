@@ -2,6 +2,14 @@
 
 {% block content %}
 
+{% if user.get_profile.notification_set.all %}
+<h4>Notifications</h4>
+{% for notification in user.get_profile.notification_set.all %}
+{{ notification.message|safe }}
+<hr />
+{% endfor %}
+{% endif %}
+
 <h4>Welcome. At the moment this website is in development so it won't be of any use to you. I hope you'll check back again another time though.</h4>
 <p>Welcome to the Going Spare, the new website for sharing stuff.</p>
 

@@ -19,7 +19,7 @@ staffmember_required=user_passes_test(lambda u: not u.is_anonymous() and u.is_st
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model=UserProfile
-        exclude=('user',)
+        exclude=('user', 'watched_users')
 
     class Media:
         js=("http://www.google.com/jsapi?key=ABQIAAAA0okLrKZhiNabzBlBE2rJHRQRB3d2m0eE07bem--pb7XcM7LibBS3sJZUsLLOaucwIRuf8Q4305bVSw","/media/js/location_widget.js")

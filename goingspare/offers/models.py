@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.urlresolvers import reverse
+
 from userprofile.models import UserProfile
 import datetime
 import random
@@ -25,6 +27,9 @@ class BaseOffer(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     date_time_added = models.DateTimeField(blank=True, default=datetime.datetime.now)
+
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
     
     class Meta:
         abstract = True
@@ -65,6 +70,9 @@ class LocalOffer(BaseOffer):
     hash = models.CharField(max_length=25, unique=True, db_index=True, blank=True)
 
     objects = OfferManager()
+
+    def get_absolute_url(self):
+        return reverse('view-offer', kwargs={'offer_hash':self.hash})
 
     def save(self, *args, **kwargs):
         if not self.hash:

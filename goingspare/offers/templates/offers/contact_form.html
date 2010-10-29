@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="post" action="">
+{{ offer_contact_form.errors }}
+{{ offer_contact_form.as_p }}
+<input type="submit" />
+</form>
+{% endblock %}

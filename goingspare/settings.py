@@ -87,6 +87,7 @@ INSTALLED_APPS = (
     'goingspare.offers',
     'goingspare.userprofile',
     'goingspare.utils',
+    'goingspare.notifications',
 )
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
