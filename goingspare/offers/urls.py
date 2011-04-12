@@ -1,10 +1,12 @@
 from django.conf.urls.defaults import *
 
+from .feeds import UserActivityFeed
+
 urlpatterns = patterns('offers.views',
 #    url(r'^$', 'index'),
     url(r'^my-offers/$', 'my_offers', name='my-offers'),
     url(r'^offers/$', 'others_offers', name='others-offers'),
-#    url(r'^user/(?P<offer_id>\d+)/$', 'user_offers', name="user-offers"),
+    url(r'^user/(?P<user_id>\d+)/$', UserActivityFeed(), name="user-offers"),
     url(r'^add/$', 'edit_offer', name='edit-offer'),
     url(r'^edit/(?P<offer_id>\d+)/$', 'edit_offer', name='edit-offer'),
     url(r'^delete/(?P<offer_id>\d+)/$', 'delete_offer', name='delete-offer'),
