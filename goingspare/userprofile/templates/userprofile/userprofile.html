@@ -15,6 +15,7 @@
         {% endif %}
         <h4>{{offer.title}}</h4>
         {{offer.description|truncatewords:100}}
+        <p><a href="{% url offer-contact offer.hash %}">Contact <strong>{{ offer.donor.get_best_name }}</strong> about this offer</a></p>
         <div style="clear:both"></div>
         </div>
     {% endfor %}

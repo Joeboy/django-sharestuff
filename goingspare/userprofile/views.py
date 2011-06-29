@@ -30,7 +30,6 @@ class UserProfileForm(forms.ModelForm):
                           )
                 }
 
-@login_required
 def view_profile(request, user_id):
     userprofile = get_object_or_404(UserProfile, id=user_id)
     return render_to_response_context(request, 'userprofile/userprofile.html', {'userprofile':userprofile})
