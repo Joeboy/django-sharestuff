@@ -19,3 +19,8 @@ urlpatterns = patterns('offers.views',
 #    url(r'^search/$', 'search'),
 #    url(r'^(?P<cat_slug>[\w-]+)/$', 'top_level'),
 )
+
+urlpatterns += patterns('offers.images.views',
+    url(r'^images/add/$', 'add_image', name='edit-image'),
+    url(r'^(?P<offer_id>\d+)/images/add/$', 'add_image', name='add-image'),
+)

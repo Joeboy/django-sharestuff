@@ -54,8 +54,8 @@ SECRET_KEY = 'u#sz&fkue01fmwzef-6-_4rlg=7k4$kxu$g5hataa2b!y6py(r'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.load_template_source',
 )
 
@@ -88,6 +88,7 @@ INSTALLED_APPS = (
     'goingspare.userprofile',
     'goingspare.utils',
     'goingspare.notifications',
+    'goingspare.oauth',
 )
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'

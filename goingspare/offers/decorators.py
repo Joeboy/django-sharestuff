@@ -1,3 +1,4 @@
+from functools import wraps
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.utils.http import urlquote
 from django.conf import settings
@@ -11,6 +12,7 @@ def user_offer(func):
     Decorator that looks for an offer that has the offer_id passed to the
     function and is owned by the user
     """
+    @wraps(func)
     def _inner(request, *args, **kwargs):
         if request.user.is_anonymous():
             path = urlquote(request.get_full_path())

@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 #from django.contrib.localflavor.uk.forms import UKPostcodeField
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
+from django.db import transaction
 from userprofile.models import UserProfile
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth import login as django_login, logout as django_logout
@@ -17,6 +18,7 @@ from django.contrib.auth.decorators import user_passes_test
 staffmember_required=user_passes_test(lambda u: not u.is_anonymous() and u.is_staff)
 
 class UserProfileForm(forms.ModelForm):
+    email = forms.EmailField()
     class Meta:
         model=UserProfile
         exclude=('user', 'watched_users')
@@ -39,15 +41,19 @@ def index(request):
     return render_to_response_context(request, 'userprofile/index.html', {'userprofiles':userprofiles})
 
 @login_required
+@transaction.commit_on_success
 def edit(request):
     userprofile = request.user.get_profile()
     if request.method == 'POST':
         form = UserProfileForm(instance=userprofile, data=request.POST)
         if form.is_valid():
             form.save()
+            request.user.email = form.cleaned_data['email']
+            request.user.save()
             return HttpResponseRedirect("/user/updated/")
     else:
-        form = UserProfileForm(instance=userprofile)
+        form = UserProfileForm(instance=userprofile,
+                               initial={'email':userprofile.user.email})
 
     return render_to_response_context(request, 'userprofile/edit.html', {'userprofile_form':form,})
 
@@ -74,6 +80,7 @@ def logout(request):
     return HttpResponseRedirect('/')
 
 @login_required
+@transaction.commit_on_success
 def change_password(request):
     if request.POST:
         form = PasswordChangeForm(request.user, request.POST)

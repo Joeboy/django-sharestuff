@@ -8,7 +8,8 @@ urlpatterns = patterns('',
     url(r'^$', 'goingspare.views.index', name='homepage'),
     url(r'^offers/', include('offers.urls')),
     url(r'^user/', include ('userprofile.urls')),
-    url('^admin/(.*)', admin.site.urls),
+    url(r'^oauth/', include('oauth.urls')),
+    url('^admin/', admin.site.urls),
 )
 
 if settings.LOCAL_DEV:

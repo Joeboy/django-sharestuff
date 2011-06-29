@@ -1,12 +1,16 @@
 {% extends "base.html" %}
 
 {% block extrahead %}{{block.super}}
+<script type="text/javascript">
+    var offer_id = parseInt("{{ offer.id }}");
+    var images = {{ image_list|safe }};
+</script>
 {{ form.media }}
 {% endblock %}
 
 
 {% block content %}
-<form method="post" action="">
+<form id="edit-offer-form" method="post" action="">
 {{ form.errors }}
 
 <h4><label for="id_title">{{ form.title.label }}</label></h4>
@@ -16,9 +20,11 @@
 <p>Enter any further information about your offer</p>
 <p>{{form.description}}</p>
 <p><label for="id_live_status">{{ form.live_status.label }}</label>: {{form.live_status}}</p>
-<p><label for="id_latitide">{{ form.latitude.label }}</label>: {{ form.latitude }}</p>
-<p><label for="id_longitide">{{ form.longitude.label }}</label>: {{ form.longitude }}</p>
 
-<input type="submit" />
+{{ form.image_list }}
+
+{{ image_formset.as_p }}
+
+<input type="submit" value="Update" />
 </form>
 {% endblock %}

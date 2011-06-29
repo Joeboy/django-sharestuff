@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from userprofile.models import UserProfile
 import datetime
 import random
+import json
 
 B36_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
 
@@ -16,8 +17,8 @@ class OfferCategory(models.Model):
 
 class LocalOfferImage(models.Model):
     image = models.ImageField(upload_to='offer_images/local')
-    caption = models.TextField()
-    offer = models.ForeignKey('LocalOffer')
+    caption = models.TextField(blank=True, null=True)
+    offer = models.ForeignKey('LocalOffer', blank=True, null=True)
 
 class BaseOffer(models.Model):
     """
@@ -64,7 +65,7 @@ class LocalOffer(BaseOffer):
             base36 = B36_ALPHABET[i] + base36
         return base36 or B36_ALPHABET[0]
 
-    live_status = models.BooleanField(default=True)
+    live_status = models.BooleanField("Active", default=True)
     donor = models.ForeignKey(UserProfile)
     # A slightly obfuscated id for public use:
     hash = models.CharField(max_length=25, unique=True, db_index=True, blank=True)
@@ -79,6 +80,11 @@ class LocalOffer(BaseOffer):
             self.hash = self.get_random_hash()
         super(LocalOffer, self).save(*args, **kwargs)
 
+    def image_list(self):
+        """
+        Convenience function for passing image info to js
+        """
+        return json.dumps([{'id':im.id, 'url':im.image.url, 'caption':im.caption} for im in self.localofferimage_set.order_by('id')])
 
 class RemoteOffer(BaseOffer):
     """

@@ -40,3 +40,40 @@ td p {
 .geo {
     display:none;
 }
+
+div.thumb {
+    float:left;
+    margin-right:5px;
+    width:128px;
+    height:128px;
+    border:1px solid #ccc;
+    text-align:center;
+}
+
+div.thumb a {
+    height:128px;
+    width:128px;
+    text-align: center;
+    vertical-align:middle;
+    display:table-cell;
+    line-height: 128px;
+}
+
+div.thumb img{
+    vertical-align:middle;
+    max-width: 128px;
+    max-height: 128px;
+}
+
+#add-image {
+    clear:left;
+}
+
+#image-dialog {
+    text-align: center;
+}
+
+#image-dialog img {
+    max-width:450px;
+    max-height:450px;
+}
