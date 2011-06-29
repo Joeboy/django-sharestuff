@@ -7,8 +7,16 @@
 {% if userprofile.localoffer_set.all %}
 <h3>Offers:</h3>
     {% for offer in userprofile.localoffer_set.all %}
+        <div class="{% cycle 'light-row' 'dark-row' %}">
+        {% if offer.localofferimage_set.all %}
+        <div style="float:right" class="small-thumb">
+        <img src="{{ offer.localofferimage_set.all.0.image.url }}" />
+        </div>
+        {% endif %}
         <h4>{{offer.title}}</h4>
-        {{offer.description|truncatewords:10}}
+        {{offer.description|truncatewords:100}}
+        <div style="clear:both"></div>
+        </div>
     {% endfor %}
 {% else %}
     <h3>No offers</h3>

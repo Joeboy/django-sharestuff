@@ -66,6 +66,29 @@ div.thumb img{
     max-height: 128px;
 }
 
+div.small-thumb {
+    width:80px;
+    height:80px;
+    background-color:#eee;
+    border:1px solid #ccc;
+    text-align:center;
+}
+
+div.small-thumb a {
+    height:80px;
+    width:80px;
+    text-align: center;
+    vertical-align:middle;
+    display:table-cell;
+    line-height: 80px;
+}
+
+div.small-thumb img{
+    vertical-align:middle;
+    max-width: 80px;
+    max-height: 80px;
+}
+
 #add-image {
     clear:left;
 }
@@ -77,4 +100,27 @@ div.thumb img{
 #image-dialog img {
     max-width:450px;
     max-height:450px;
+}
+
+.light-row {
+    max-width:750px;
+    min-height:80px;
+    margin:0px;
+    padding:4px;
+    background-color: #eee;
+}
+
+.dark-row {
+    max-width:750px;
+    min-height:80px;
+    margin:0px;
+    padding:4px;
+    background-color: #ddd;
+}
+
+.light-row h4 {
+    margin:0px 4px 8px 0px;
+}
+.dark-row h4 {
+    margin:0px 4px 8px 0px;
 }
