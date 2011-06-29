@@ -1,6 +1,35 @@
 {% extends 'base.html' %}
 
+{% block extrahead %}
+<script type="text/javascript">
+jQuery(function() {
+    jQuery('.thumb a').click(function() {
+        jQuery('#big-image img').attr('src', this.href);
+        jQuery('#big-image a').attr('href', this.href);
+        return false;
+    });
+});
+</script>
+
+{% endblock %}
+
 {% block content %}
+{% if offer.localofferimage_set.all %}
+    <p id="big-image"><a href="{{ offer.localofferimage_set.all.0.image.url }}"><img src="{{ offer.localofferimage_set.all.0.image.url }}" /></a></p>
+{% endif %}
+
 <h4>{{offer.title }}</h4>
+
 {{ offer.description }}
+{% if user.is_authenticated %}
+    <p><a href="{% url offer-contact offer.hash %}">Contact <strong>{{ offer.donor.get_best_name }}</strong> about this offer</a></p>
+{% endif %}
+
+{% if offer.localofferimage_set.all.count > 0 %}
+<p>
+{% for image in offer.localofferimage_set.all %}
+        <div class="thumb"><a href="{{ image.image.url }}"><img title="{{ image.caption }}" src="{{ image.image.url }}"></a></div>
+{% endfor %}
+</p>
+{% endif %}
 {% endblock %}

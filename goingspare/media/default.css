@@ -1,5 +1,6 @@
 body {
     font-family:"lucida grande", tahoma, verdana, arial, sans-serif;
+    font-size: 85%;
     margin:0px;
     padding:0px;
 }
@@ -16,6 +17,7 @@ body {
 
 #container {
     margin:12px;
+    max-width:780px;
 }
 
 table {
@@ -123,4 +125,14 @@ div.small-thumb img{
 }
 .dark-row h4 {
     margin:0px 4px 8px 0px;
+}
+
+#big-image {
+    float:right;
+}
+
+#big-image img {
+    border:2px solid #ccc;
+    max-width:375px;
+    max-height:375px;
 }

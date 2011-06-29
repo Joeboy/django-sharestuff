@@ -1,9 +1,5 @@
 from django.conf.urls.defaults import *
 
-from userprofile.models import UserProfile
-def create_userprofile(user):
-    userprofile = UserProfile.objects.create(user=user)
-
 urlpatterns = patterns('',
     url(r'^$', 'userprofile.views.index'),
     url(r'^(?P<user_id>\d+)/$', 'userprofile.views.view_profile', name="view-userprofile"),
