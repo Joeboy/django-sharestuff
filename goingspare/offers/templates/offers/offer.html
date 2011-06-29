@@ -25,7 +25,7 @@ jQuery(function() {
     <p><a href="{% url offer-contact offer.hash %}">Contact <strong>{{ offer.donor.get_best_name }}</strong> about this offer</a></p>
 {% endif %}
 
-{% if offer.localofferimage_set.all.count > 0 %}
+{% if offer.localofferimage_set.all.count > 1 %}
 <p>
 {% for image in offer.localofferimage_set.all %}
         <div class="thumb"><a href="{{ image.image.url }}"><img title="{{ image.caption }}" src="{{ image.image.url }}"></a></div>
