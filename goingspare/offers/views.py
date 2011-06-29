@@ -60,7 +60,7 @@ class RawModelChoiceField(forms.ModelChoiceField):
 
 class OfferForm(forms.ModelForm):
 #    category=RawModelChoiceField(queryset=OfferCategory.objects.all(), widget=CategoryWidget)
-    image_list = forms.CharField()
+    image_list = forms.CharField(widget=forms.HiddenInput)
 
     def clean_image_list(self):
         il = self.cleaned_data['image_list']

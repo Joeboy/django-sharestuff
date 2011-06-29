@@ -46,6 +46,7 @@ div.thumb {
     margin-right:5px;
     width:128px;
     height:128px;
+    background-color:#eee;
     border:1px solid #ccc;
     text-align:center;
 }
