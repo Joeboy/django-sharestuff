@@ -10,7 +10,7 @@
         <div class="{% cycle 'light-row' 'dark-row' %}">
         {% if offer.localofferimage_set.all %}
         <div style="float:right" class="small-thumb">
-        <img src="{{ offer.localofferimage_set.all.0.image.url }}" />
+        <a href="{{ offer.localofferimage_set.all.0.image.url }}"><img src="{{ offer.localofferimage_set.all.0.image.url }}" /></a>
         </div>
         {% endif %}
         <h4>{{offer.title}}</h4>
