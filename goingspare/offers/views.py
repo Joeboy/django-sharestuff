@@ -89,14 +89,14 @@ def edit_offer(request, offer=None):
     if request.method == 'POST':
         form = OfferForm(request.POST, instance=offer)
         if form.is_valid():
-            for im in form.cleaned_data['image_list']:
-                im.offer = offer
-                im.save()
             offer = OfferForm.save(form, commit=False)
             offer.donor = userp
             offer.longitude = userp.longitude
             offer.latitude = userp.latitude
             offer.save()
+            for im in form.cleaned_data['image_list']:
+                im.offer = offer
+                im.save()
             action = offer and 'edited' or 'created'
             request.user.message_set.create(message="A offer was successfully %s." % action)
             return HttpResponseRedirect(reverse('my-offers'))
