@@ -3,6 +3,9 @@ body {
     font-size: 85%;
     margin:0px;
     padding:0px;
+    max-width: 850px;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
 }
 
 #masthead {
@@ -10,9 +13,14 @@ body {
 }
 
 #masthead h2 {
-    text-align:right;
     margin:0px;
     padding:3px;
+    letter-spacing: 0.5em;
+    text-align: center;
+}
+
+#masthead h2 a {
+    text-decoration: none;
 }
 
 #container {

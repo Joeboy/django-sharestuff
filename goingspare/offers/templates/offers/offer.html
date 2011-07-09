@@ -32,4 +32,6 @@ jQuery(function() {
 {% endfor %}
 </p>
 {% endif %}
+
+<p><a href="{{ offer.donor.get_absolute_url }}">View {{ offer.donor.get_best_name }}'s other offers</a></p>
 {% endblock %}

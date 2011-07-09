@@ -11,7 +11,7 @@ What's this thing for?
 The grand plan
 --------------
 The grand plan is to establish an open platform for sharing unneeded goods.
-Think of it like Freecycle2.0, or The Pirate Bay for physical objects.
+Think of it like Freecycle for Web 2.0, or The Pirate Bay for physical objects.
 
 The short term plan
 -------------------
