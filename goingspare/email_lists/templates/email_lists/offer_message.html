@@ -1,4 +1,4 @@
-OFFERED: {{ offer.title }} ({{ userprofile.get_vague_area }})
-{{offer.description}}
+OFFERED: {{ offer.title|safe }} ({{ userprofile.get_vague_area }})
+{{offer.description|safe}}
 
 Full info at {{ offer.get_full_url }}

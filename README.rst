@@ -31,6 +31,7 @@ Longer term plans
  * Think further about how users will contact each other once one of them has
    identified something they want
  * Wanted listings
+ * An API
 
 Status
 ======
