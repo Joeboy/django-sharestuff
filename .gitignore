@@ -2,3 +2,5 @@ goingspare/localsettings.py
 goingspare/*.sqlite
 *.pyc
 *.swp
+goingspare/media/offer_images/local/*.jpg
+goingspare/media/offer_images/local/*.png

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<form method="post" action="">
+{{ form.errors }}
+
+<p>This form allows you to select a 'Freecycle' type email list to send messages to. Note that you need to be subscribed to the list before you can send email to it.</p>
+
+<p>If your list doesn't appear in the drop down box below, please email the site admin and I'll add it, assuming it looks kosher.</p>
+
+<p>{{ form.email_list.label }}: {{ form.email_list }}</p>
+
+<p>Please confirm the email address with which you are subscribed to this list: {{ form.from_email }}</p>
+
+<input type="submit" value="Select" />
+</form>
+{% endblock %}

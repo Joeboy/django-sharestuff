@@ -85,6 +85,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'registration',
     'goingspare.offers',
+    'goingspare.email_lists',
     'goingspare.userprofile',
     'goingspare.utils',
     'goingspare.notifications',

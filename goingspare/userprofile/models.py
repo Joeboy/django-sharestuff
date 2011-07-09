@@ -2,13 +2,28 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-from utils.dbfields import UKPhoneNumberField
+from utils.dbfields import UKPhoneNumberField, UKPostcodeField
+
+#EMAIL_LISTS = (('norwichfreegle@yahoogroups.com', 'Norwich Freegle'),
+#               ('norwichukfreecycle@groups.freecycle.org', 'Norwich Freecycle')
+#)
+
+
+class Subscription(models.Model):
+    email_list = models.ForeignKey('email_lists.EmailList')
+    userprofile = models.ForeignKey('userprofile.UserProfile')
+    from_email = models.EmailField(blank=True, null=True)
+
+    def __unicode__(self):
+        return unicode(self.email_list)
      
+
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True)
     phone_number = UKPhoneNumberField(null=True, blank=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     info = models.TextField(null=True, blank=True)
+    postcode = UKPostcodeField(null=True, blank=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
 
@@ -21,8 +36,13 @@ class UserProfile(models.Model):
 
     watched_users = models.ManyToManyField('UserProfile', blank=True)
 
+    email_lists = models.ManyToManyField('email_lists.EmailList', through=Subscription, blank=True)
+
     def get_best_name(self):
         return self.name or self.user.username
+
+    def get_vague_area(self):
+        return self.postcode.split(' ')[0]
 
     def __unicode__(self):
         return "%s's UserProfile" % self.user.username

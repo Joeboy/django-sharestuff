@@ -21,7 +21,7 @@ class UserProfileForm(forms.ModelForm):
     email = forms.EmailField()
     class Meta:
         model=UserProfile
-        exclude=('user', 'watched_users')
+        exclude=('user', 'watched_users', 'email_lists')
 
     class Media:
         js=("http://www.google.com/jsapi?key=ABQIAAAA0okLrKZhiNabzBlBE2rJHRQRB3d2m0eE07bem--pb7XcM7LibBS3sJZUsLLOaucwIRuf8Q4305bVSw","/media/js/location_widget.js")

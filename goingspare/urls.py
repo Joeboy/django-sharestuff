@@ -8,6 +8,7 @@ urlpatterns = patterns('',
     url(r'^$', 'goingspare.views.index', name='homepage'),
     url(r'^offers/', include('offers.urls')),
     url(r'^user/', include ('userprofile.urls')),
+    url(r'^email_lists/', include('email_lists.urls')),
     url(r'^oauth/', include('oauth.urls')),
     url('^admin/', admin.site.urls),
 )

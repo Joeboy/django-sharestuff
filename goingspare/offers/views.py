@@ -1,6 +1,5 @@
 import re
 import json
-from itertools import chain
 
 from django.http import (HttpResponse, HttpResponseRedirect,
                          HttpResponseServerError)
@@ -13,7 +12,11 @@ from django.shortcuts import get_object_or_404
 from offers.models import LocalOffer, OfferCategory, LocalOfferImage
 from django.core.exceptions import PermissionDenied
 from django.db import connection, transaction
-from userprofile.models import UserProfile
+from django.template.loader import get_template
+from django.template import Context
+from django.contrib.sites.models import Site
+
+from userprofile.models import UserProfile, Subscription
 
 from goingspare.utils import render_to_response_context
 from goingspare.offers.decorators import user_offer
@@ -60,13 +63,13 @@ class RawModelChoiceField(forms.ModelChoiceField):
 
 class OfferForm(forms.ModelForm):
 #    category=RawModelChoiceField(queryset=OfferCategory.objects.all(), widget=CategoryWidget)
-    image_list = forms.CharField(widget=forms.HiddenInput)
+    image_list = forms.CharField(widget=forms.HiddenInput, required=False)
 
     def clean_image_list(self):
         il = self.cleaned_data['image_list']
         if not CSV_RE.match(il):
             raise forms.ValidationError('There was an error to do with the list of images attached to your post.')
-        image_ids = il.split(',')
+        image_ids = filter(len, il.split(','))
         images = LocalOfferImage.objects.filter(id__in=image_ids)
         if len(images) != len(image_ids):
             raise forms.ValidationError, "There was some kind of problem."
@@ -126,6 +129,48 @@ def delete_offer(request, offer):
         return HttpResponseRedirect(reverse('my-offers'))
     else:
         return render_to_response_context(request, 'offers/confirm_delete_offer.html')
+
+
+class EmailOfferToListForm(forms.Form):
+    user_email_list = forms.ModelChoiceField(queryset=Subscription.objects.none())
+    subject = forms.CharField()
+    message = forms.CharField(widget=forms.Textarea)
+
+    def __init__(self, *args, **kwargs):
+        userprofile = kwargs.pop('userprofile')
+        super(EmailOfferToListForm, self).__init__(*args, **kwargs)
+        self.fields['user_email_list'].queryset = userprofile.subscription_set.all()
+
+
+@user_offer
+def email_offer_to_list(request, offer):
+    userprofile = request.user.get_profile()
+    if request.POST:
+        form = EmailOfferToListForm(request.POST, userprofile=userprofile)
+        if form.is_valid():
+            send_mail(form.cleaned_data['subject'],
+                      form.cleaned_data['message'],
+                      form.cleaned_data['user_email_list'].from_email,
+                      [form.cleaned_data['user_email_list'].email_list.email],
+                      fail_silently=False)
+            return HttpResponseRedirect(reverse('my-offers'))
+    else:
+        t = get_template('email_lists/offer_message.html')
+        c = Context({'userprofile': userprofile,
+                     'offer': offer,
+                     })
+        m = t.render(c)
+        subject, message = m.split('\n', 1)
+        initial = {'subject': subject,
+                   'message':message }
+        if userprofile.email_lists.count() == 1:
+            initial['email_list'] = userprofile.email_lists.get()
+        form = EmailOfferToListForm(userprofile=request.user.get_profile(),
+                                    initial=initial)
+    c = {'offer': offer,
+         'form': form}
+    return render_to_response_context(request, 'offers/email_offer_to_list.html', c)
+
 
 
 @login_required

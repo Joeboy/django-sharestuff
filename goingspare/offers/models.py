@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
 
 from userprofile.models import UserProfile
 import datetime
@@ -7,6 +8,7 @@ import random
 import json
 
 B36_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
+SITE_DOMAIN = Site.objects.get_current().domain
 
 class OfferCategory(models.Model):
     title = models.CharField(max_length=255)
@@ -74,6 +76,9 @@ class LocalOffer(BaseOffer):
 
     def get_absolute_url(self):
         return reverse('view-offer', kwargs={'offer_hash':self.hash})
+
+    def get_full_url(self):
+        return 'http://%s%s' % (SITE_DOMAIN, self.get_absolute_url())
 
     def save(self, *args, **kwargs):
         if not self.hash:
