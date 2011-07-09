@@ -19,13 +19,13 @@ class AddEmailListForm(forms.Form):
         self.fields['email_list'].queryset = EmailList.objects.exclude(id__in=users_emaillist_ids)
 
 
-def add_email_list(request):
+def add_subscription(request):
     userprofile = request.user.get_profile()
 
     if request.POST:
         form = AddEmailListForm(request.POST, userprofile=userprofile)
         if form.is_valid():
-            useremaillist = Subscription.objects.create(
+            subscription = Subscription.objects.create(
                 userprofile = request.user.get_profile(),
                 email_list = form.cleaned_data['email_list'],
                 from_email = form.cleaned_data['from_email']

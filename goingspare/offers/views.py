@@ -132,14 +132,14 @@ def delete_offer(request, offer):
 
 
 class EmailOfferToListForm(forms.Form):
-    user_email_list = forms.ModelChoiceField(queryset=Subscription.objects.none())
+    subscription = forms.ModelChoiceField(queryset=Subscription.objects.none())
     subject = forms.CharField()
     message = forms.CharField(widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
         userprofile = kwargs.pop('userprofile')
         super(EmailOfferToListForm, self).__init__(*args, **kwargs)
-        self.fields['user_email_list'].queryset = userprofile.subscription_set.all()
+        self.fields['subscription'].queryset = userprofile.subscription_set.all()
 
 
 @user_offer
@@ -150,8 +150,8 @@ def email_offer_to_list(request, offer):
         if form.is_valid():
             send_mail(form.cleaned_data['subject'],
                       form.cleaned_data['message'],
-                      form.cleaned_data['user_email_list'].from_email,
-                      [form.cleaned_data['user_email_list'].email_list.email],
+                      form.cleaned_data['subscription'].from_email,
+                      [form.cleaned_data['subscription'].email_list.email],
                       fail_silently=False)
             return HttpResponseRedirect(reverse('my-offers'))
     else:
@@ -163,8 +163,8 @@ def email_offer_to_list(request, offer):
         subject, message = m.split('\n', 1)
         initial = {'subject': subject,
                    'message':message }
-        if userprofile.email_lists.count() == 1:
-            initial['email_list'] = userprofile.email_lists.get()
+        if userprofile.subscription_set.count() == 1:
+            initial['subscription'] = userprofile.subscription_set.get()
         form = EmailOfferToListForm(userprofile=request.user.get_profile(),
                                     initial=initial)
     c = {'offer': offer,

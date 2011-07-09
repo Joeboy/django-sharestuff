@@ -3,11 +3,11 @@
 {% block content %}
 <form method="post" action="">
 
-{% if form.fields.user_email_list.queryset %}
+{% if form.fields.subscription.queryset %}
     {{ form.errors }}
     <p>Select an email list to send your message to:</p>
-    {{ form.user_email_list }}
-    <p><a href="{% url add-email-list %}">Add an email list</a> (you need to be subscribed to the list first)</p>
+    {{ form.subscription }}
+    <p><a href="{% url add-subscription %}">Add an email list</a> (you need to be subscribed to the list first)</p>
 
     <p>{{ form.subject.label }}: {{ form.subject }}</p>
 
@@ -16,6 +16,6 @@
     <input type="submit" value="Send" />
     </form>
 {% else %}
-    <p><a href="{% url add-email-list %}">Add an email list</a> (you need to be subscribed to the list first)</p>
+    <p><a href="{% url add-subscription %}">Add an email list</a> (you need to be subscribed to the list first)</p>
 {% endif %}
 {% endblock %}

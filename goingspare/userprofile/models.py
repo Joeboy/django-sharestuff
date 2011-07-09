@@ -42,7 +42,7 @@ class UserProfile(models.Model):
         return self.name or self.user.username
 
     def get_vague_area(self):
-        return self.postcode.split(' ')[0]
+        return self.postcode and self.postcode.split(' ')[0] or 'Where?'
 
     def __unicode__(self):
         return "%s's UserProfile" % self.user.username
