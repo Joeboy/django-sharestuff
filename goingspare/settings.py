@@ -90,6 +90,8 @@ INSTALLED_APPS = (
     'goingspare.utils',
     'goingspare.notifications',
     'goingspare.oauth',
+    'sentry',
+    'sentry.client',
 )
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'

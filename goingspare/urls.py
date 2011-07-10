@@ -11,6 +11,8 @@ urlpatterns = patterns('',
     url(r'^email_lists/', include('email_lists.urls')),
     url(r'^oauth/', include('oauth.urls')),
     url('^admin/', admin.site.urls),
+    url(r'^sentry/', include('sentry.web.urls')),
+
 )
 
 if settings.LOCAL_DEV:

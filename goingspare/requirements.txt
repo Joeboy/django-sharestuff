@@ -1,0 +1,5 @@
+Django==1.3
+PIL==1.1.7
+django-sentry==1.8.6.2
+oauth==1.0a
+oauth2==1.5.168
