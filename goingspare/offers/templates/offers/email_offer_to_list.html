@@ -3,6 +3,19 @@
 {% block content %}
 <form method="post" action="">
 
+{% for message in offer.emailmessage_set.all %}
+    {% if forloop.first %}
+    <p>You've previously sent details of this message to:</p>
+    <ul>
+    {% endif %}
+
+    <li>{{ message.subscription.email_list.name }} on {{ message.datetime_sent }}</li>
+    {% if forloop.last %}
+    </ul>
+    {% endif %}
+{% endfor %}
+
+
 {% if form.fields.subscription.queryset %}
     {{ form.errors }}
     <p>Select an email list to send your message to:</p>

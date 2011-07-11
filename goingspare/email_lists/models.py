@@ -1,4 +1,27 @@
 from django.db import models
+from datetime import datetime
+from django.core.mail import send_mail
+
+class EmailMessage(models.Model):
+    """
+    An email message, send by a user to an email list the user is subscribed
+    to.
+    """
+    subscription = models.ForeignKey('userprofile.subscription')
+    offer = models.ForeignKey('offers.LocalOffer')
+    subject = models.TextField()
+    body = models.TextField()
+    datetime_sent = models.DateTimeField(blank=True, null=True)
+
+    def send_mail(self, *args, **kwargs):
+        send_mail(self.subject,
+                  self.body,
+                  self.subscription.from_email,
+                  [self.subscription.email_list.email],
+                  fail_silently=False)
+        self.datetime_sent = datetime.now()
+        self.save(*args, **kwargs)
+
 
 class EmailList(models.Model):
     """

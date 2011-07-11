@@ -6,7 +6,8 @@
 {% endblock %}
 
 {% block content %}
-<h2>{{ user.get_profile.get_best_name }}'s profile</h2>
+<h2>Your information</h2>
+<p><a href="/user/change-password/">Change password</a></p>
 <p>You don't have to tell us any of the following information. It's up to you whether you want people to know this stuff.</p>
 {{ userprofile_form.errors }}
 <form action="" method="post" id="userprofile_form">

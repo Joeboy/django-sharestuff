@@ -23,7 +23,7 @@
 			{% block menu %}{% endblock %}
 {% if user.is_authenticated %}
 <p>Hello <strong>{{user.get_profile.get_best_name}}</strong></p>
-<p><a href="{% url edit-userprofile %}">Edit your profile</a> | <a href="{% url my-offers %}">Edit your offers</a> | <a href="{% url user-list %}">Other people</a> | <a href="{% url others-offers %}">Other people's offers</a> | <a href="/user/change-password/">Change password</a> | <a href="/user/logout/">Log out</a></p>
+<p><a href="{% url edit-userprofile %}">You</a> | <a href="{% url my-offers %}">Your offers</a> | <a href="{% url user-list %}">Other people</a> | <a href="{% url others-offers %}">Other people's offers</a> | <a href="/user/logout/">Log out</a></p>
 {% else %}
 <p><a href="/user/login/">Log in</a> | <a href="/user/register/">Register</a></p>
 {% endif %}

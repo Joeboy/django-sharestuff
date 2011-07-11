@@ -9,18 +9,19 @@ from django.contrib.auth.decorators import login_required
 from django import forms
 from django.forms.fields import Field, EMPTY_VALUES
 from django.shortcuts import get_object_or_404
-from offers.models import LocalOffer, OfferCategory, LocalOfferImage
 from django.core.exceptions import PermissionDenied
 from django.db import connection, transaction
 from django.template.loader import get_template
 from django.template import Context
 from django.contrib.sites.models import Site
 
+from offers.models import LocalOffer, OfferCategory, LocalOfferImage
 from userprofile.models import UserProfile, Subscription
 
 from goingspare.utils import render_to_response_context
 from goingspare.offers.decorators import user_offer
 from notifications.models import Notification
+from email_lists.models import EmailMessage
 
 CSV_RE = re.compile(r'^[\d,]*$')
 
@@ -148,11 +149,14 @@ def email_offer_to_list(request, offer):
     if request.POST:
         form = EmailOfferToListForm(request.POST, userprofile=userprofile)
         if form.is_valid():
-            send_mail(form.cleaned_data['subject'],
-                      form.cleaned_data['message'],
-                      form.cleaned_data['subscription'].from_email,
-                      [form.cleaned_data['subscription'].email_list.email],
-                      fail_silently=False)
+            msg = EmailMessage(
+                subscription = form.cleaned_data['subscription'],
+                offer = offer,
+                subject = form.cleaned_data['subject'],
+                body = form.cleaned_data['message'],
+            )
+            msg.save()
+            msg.send_mail()
             return HttpResponseRedirect(reverse('my-offers'))
     else:
         t = get_template('email_lists/offer_message.html')
