@@ -27,7 +27,7 @@ jQuery(function() {
     <ul>
     {% endif %}
 
-    <li>{{ message.subscription.email_list.name }} on {{ message.datetime_sent }}</li>
+    <li>{{ message.subscription.email_list.name }} on {{ message.datetime_sent }} ({{ message.message_type }})</li>
     {% if forloop.last %}
     </ul>
     {% endif %}

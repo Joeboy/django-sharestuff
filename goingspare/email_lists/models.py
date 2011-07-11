@@ -26,6 +26,9 @@ class EmailMessage(models.Model):
         self.datetime_sent = datetime.now()
         self.save(*args, **kwargs)
 
+    class Meta:
+        ordering = ('-datetime_sent',)
+
 
 class EmailList(models.Model):
     """
