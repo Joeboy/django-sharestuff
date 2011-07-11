@@ -1,5 +1,23 @@
 {% extends "base.html" %}
 
+{% block extrahead %}
+<script type="text/javascript">
+jQuery(function() {
+    var offer_hash = '{{ offer.hash }}';
+    if (!jQuery('ul.errorlist').length) {
+        jQuery('#message-fields').hide();
+    }
+    jQuery('#id_message_type').change(function() {
+        jQuery.getJSON('/email-lists/get-message/'+jQuery(this).val()+'/'+offer_hash+'/', null, function(data) {
+            jQuery('#id_subject').val(data.subject);
+            jQuery('#id_message').val(data.message);
+            jQuery('#message-fields').show();
+        });
+    });
+});
+</script>
+{% endblock %}
+
 {% block content %}
 <form method="post" action="">
 
@@ -22,11 +40,15 @@
     {{ form.subscription }}
     <p><a href="{% url add-subscription %}">Add an email list</a> (you need to be subscribed to the list first)</p>
 
+    <p>Message type: {{ form.message_type }}</p>
+
+    <div id="message-fields">
     <p>{{ form.subject.label }}: {{ form.subject }}</p>
 
     <p>{{ form.message.label }}: {{ form.message }}</p>
 
     <input type="submit" value="Send" />
+    </div>
     </form>
 {% else %}
     <p><a href="{% url add-subscription %}">Add an email list</a> (you need to be subscribed to the list first)</p>

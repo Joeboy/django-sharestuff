@@ -16,7 +16,7 @@
 <td><p>{{offer.description|truncatewords:10}}</p></td>
 <td><a href="{% url edit-offer offer.id %}">Edit</a></td>
 <td><a href="{% url delete-offer offer.id %}">Delete</a></td>
-<td><a href="{% url email-offer-list offer.id %}">Email to list</a></td>
+<td><a href="{% url email-offer-list offer.hash %}">Email to list</a></td>
 </tr>
 {% endfor %}
 </table>

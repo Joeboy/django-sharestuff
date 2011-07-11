@@ -9,8 +9,8 @@ from offers.models import LocalOffer
 
 def user_offer(func):
     """
-    Decorator that looks for an offer that has the offer_id passed to the
-    function and is owned by the user
+    Decorator that looks for an offer that has the offer_id or offer_hash
+    passed to the function and is owned by the user
     """
     @wraps(func)
     def _inner(request, *args, **kwargs):
@@ -19,11 +19,16 @@ def user_offer(func):
             tup = settings.LOGIN_URL, REDIRECT_FIELD_NAME, path
             return HttpResponseRedirect('%s?%s=%s' % tup)
 
-        try:
-            offer_id = kwargs.pop('offer_id')
-        except KeyError:
-            kwargs['offer'] = None
+        offer_spec = {}
+        for k in ('offer_id', 'offer_hash'):
+            try:
+                offer_spec[k[6:]] = kwargs.pop(k)
+            except KeyError:
+                continue
+        if offer_spec:
+            offer_spec['donor'] = request.user.get_profile()
+            kwargs['offer'] = get_object_or_404(LocalOffer, **offer_spec)
         else:
-            kwargs['offer'] = get_object_or_404(LocalOffer, id=offer_id, donor=request.user.get_profile())
+            kwargs['offer'] = None
         return func(request, *args, **kwargs)
     return _inner

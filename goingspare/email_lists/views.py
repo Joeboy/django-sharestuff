@@ -1,12 +1,16 @@
+import json
+
 from django import forms
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.db.models import Q
+from django.template.loader import get_template
+from django.template import Context
 
 from email_lists.models import EmailList
 from userprofile.models import Subscription
 
 from goingspare.utils import render_to_response_context
+from offers.decorators import user_offer
 
 class AddEmailListForm(forms.Form):
     email_list = forms.ModelChoiceField(queryset=EmailList.objects.none())
@@ -37,3 +41,13 @@ def add_subscription(request):
 
     c = {'form':form}
     return render_to_response_context(request, 'email_lists/add_email_list.html', c)
+
+
+@user_offer
+def get_message(request, offer=None, message_type=None, offer_hash=None):
+    t = get_template('email_lists/messages/%s.html' % (message_type))
+    c = Context({'userprofile': request.user.get_profile(),
+                 'offer': offer, })
+    m = t.render(c)
+    subject, message = m.split('\n', 1)
+    return HttpResponse(json.dumps({'subject': subject, 'message':message}))

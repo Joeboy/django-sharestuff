@@ -9,11 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django import forms
 from django.forms.fields import Field, EMPTY_VALUES
 from django.shortcuts import get_object_or_404
-from django.core.exceptions import PermissionDenied
 from django.db import connection, transaction
-from django.template.loader import get_template
-from django.template import Context
-from django.contrib.sites.models import Site
 
 from offers.models import LocalOffer, OfferCategory, LocalOfferImage
 from userprofile.models import UserProfile, Subscription
@@ -132,10 +128,13 @@ def delete_offer(request, offer):
         return render_to_response_context(request, 'offers/confirm_delete_offer.html')
 
 
+MESSAGE_TYPE_CHOICES = ((0, '-------'), ('offer', 'Offer'), ('taken', 'Taken'),)
+
 class EmailOfferToListForm(forms.Form):
     subscription = forms.ModelChoiceField(queryset=Subscription.objects.none())
     subject = forms.CharField()
     message = forms.CharField(widget=forms.Textarea)
+    message_type = forms.ChoiceField(choices=MESSAGE_TYPE_CHOICES, required=False)
 
     def __init__(self, *args, **kwargs):
         userprofile = kwargs.pop('userprofile')
@@ -152,6 +151,7 @@ def email_offer_to_list(request, offer):
             msg = EmailMessage(
                 subscription = form.cleaned_data['subscription'],
                 offer = offer,
+                message_type = form.cleaned_data['message_type'],
                 subject = form.cleaned_data['subject'],
                 body = form.cleaned_data['message'],
             )
@@ -159,14 +159,7 @@ def email_offer_to_list(request, offer):
             msg.send_mail()
             return HttpResponseRedirect(reverse('my-offers'))
     else:
-        t = get_template('email_lists/offer_message.html')
-        c = Context({'userprofile': userprofile,
-                     'offer': offer,
-                     })
-        m = t.render(c)
-        subject, message = m.split('\n', 1)
-        initial = {'subject': subject,
-                   'message':message }
+        initial = {}
         if userprofile.subscription_set.count() == 1:
             initial['subscription'] = userprofile.subscription_set.get()
         form = EmailOfferToListForm(userprofile=request.user.get_profile(),
@@ -228,6 +221,7 @@ FROM offers_localoffer where donor_id in (select to_userprofile_id from userprof
                                       {'offers':offers})
 
 def view_offer(request, offer_hash):
+    print request.is_ajax()
     offer = get_object_or_404(LocalOffer, hash=offer_hash)
     return render_to_response_context(request,
                                       'offers/offer.html',

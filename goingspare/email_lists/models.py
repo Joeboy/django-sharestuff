@@ -2,6 +2,9 @@ from django.db import models
 from datetime import datetime
 from django.core.mail import send_mail
 
+MESSAGE_TYPES = ( 'OFFER', 'TAKEN', 'WANTED', 'RECEIVED',)
+MESSAGE_TYPE_CHOICES = [(k, k) for k in MESSAGE_TYPES]
+
 class EmailMessage(models.Model):
     """
     An email message, send by a user to an email list the user is subscribed
@@ -9,6 +12,7 @@ class EmailMessage(models.Model):
     """
     subscription = models.ForeignKey('userprofile.subscription')
     offer = models.ForeignKey('offers.LocalOffer')
+    message_type = models.CharField(max_length=10, choices=MESSAGE_TYPE_CHOICES)
     subject = models.TextField()
     body = models.TextField()
     datetime_sent = models.DateTimeField(blank=True, null=True)
