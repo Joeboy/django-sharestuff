@@ -15,19 +15,17 @@
 
 <body>
     <div id="masthead">
-        <h2><a href="{% url homepage %}">ShareStuff.org.uk</a></h2>
+    <a href="/"><img src="/media/header.png" alt="sharestuff.org.uk" /></a>
+		<div id="menu"><ul>
+{% if user.is_authenticated %}
+<li><a href="{% url edit-userprofile %}">You</a></li><li><a href="{% url my-offers %}">Your offers</a></li><li><a href="{% url user-list %}">Other people</a></li><li><a href="{% url others-offers %}">Other people's offers</a></li><li><a href="/user/logout/">Log out</a></li>
+{% else %}
+<li><a href="/user/login/">Log in</a></li><li><a href="/user/register/">Register</a></li>
+{% endif %}
+        </ul></div>
     </div>
 
 	<div id="container">
-		<div id="menu">
-			{% block menu %}{% endblock %}
-{% if user.is_authenticated %}
-<p>Hello <strong>{{user.get_profile.get_best_name}}</strong></p>
-<p><a href="{% url edit-userprofile %}">You</a> | <a href="{% url my-offers %}">Your offers</a> | <a href="{% url user-list %}">Other people</a> | <a href="{% url others-offers %}">Other people's offers</a> | <a href="/user/logout/">Log out</a></p>
-{% else %}
-<p><a href="/user/login/">Log in</a> | <a href="/user/register/">Register</a></p>
-{% endif %}
-		</div>
         {% if messages %}
         <ul id="messages">
             {% for message in messages %}

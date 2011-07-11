@@ -10,6 +10,8 @@ body {
 
 #masthead {
     background-color:#cc8;
+    background-color:#00b02e;
+    border-bottom: 2px solid #666;
 }
 
 #masthead h2 {
@@ -19,8 +21,24 @@ body {
     text-align: center;
 }
 
-#masthead h2 a {
-    text-decoration: none;
+#menu {
+    float:right;
+    margin-top: 12px;
+}
+
+#menu li {
+    display:inline;
+    margin-right:11px;
+    background-color:#4a4;
+    border-radius: 3px;
+    border: 1px solid #484;
+    padding:2px 4px 2px 4px;
+    font-size:90%;
+}
+
+#menu a {
+    color:#fff;
+    text-decoration:none;
 }
 
 #container {
