@@ -11,24 +11,45 @@ body {
 #masthead {
     background-color:#cc8;
     background-color:#47a224;
-    border-bottom: 2px solid #666;
+    border-bottom: 2px solid #464;
 }
 
-#masthead h2 {
+#masthead img {
+    padding-top: 3px;
+    padding-left: 2px;
+}
+
+#masthead a#notifications {
+    background-color:#f00;
+    text-decoration: none;
+    color:#fff;
+    font-weight: bold;
+    padding:1px 2px 1px 2px;
+    border-radius: 3px;
+    border-width: 0px 1px 1px 0px;
+    border-color: #363;
+    border-style: solid;
+}
+
+#masthead p {
     margin:0px;
-    padding:3px;
-    letter-spacing: 0.5em;
-    text-align: center;
+    padding:0px;
+    float:left;
 }
 
 #menu {
     float:right;
-    margin-top: 12px;
+    margin-top: 28px;
+}
+
+#menu ul {
+    margin: 0px;
+    padding: 0px;
 }
 
 #menu li {
     display:inline;
-    margin-right:11px;
+    margin: 0px 11px 0px 0px;
     background-color:#4a4;
     border-radius: 3px;
     border: 1px solid #484;
@@ -161,4 +182,11 @@ div.small-thumb img{
     border:2px solid #ccc;
     max-width:375px;
     max-height:375px;
+}
+
+.clear {
+    clear:both;
+    height:0px;
+    margin:0px;
+    padding: 0px;
 }

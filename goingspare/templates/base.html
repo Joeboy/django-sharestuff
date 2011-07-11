@@ -15,24 +15,20 @@
 
 <body>
     <div id="masthead">
-    <a href="/"><img src="/media/header.png" alt="sharestuff.org.uk" /></a>
-		<div id="menu"><ul>
+    <p><a href="/"><img src="/media/header.png" alt="sharestuff.org.uk" /></a>
+    {% if user.get_profile.notification_set.unread %}<a id="notifications" href="{% url notifications %}">{{ user.get_profile.notification_set.unread.count }}</a>{% endif %}
+    </p>
+		<ul id="menu">
 {% if user.is_authenticated %}
 <li><a href="{% url edit-userprofile %}">You</a></li><li><a href="{% url my-offers %}">Your offers</a></li><li><a href="{% url user-list %}">Other people</a></li><li><a href="{% url others-offers %}">Other people's offers</a></li><li><a href="/user/logout/">Log out</a></li>
 {% else %}
 <li><a href="/user/login/">Log in</a></li><li><a href="/user/register/">Register</a></li>
 {% endif %}
-        </ul></div>
+        </ul>
+        <div class="clear"></div>
     </div>
 
 	<div id="container">
-        {% if messages %}
-        <ul id="messages">
-            {% for message in messages %}
-                <li>{{message}}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
 		{% block content %}{% endblock %}
         <div style="clear:both"></div>
 	</div>

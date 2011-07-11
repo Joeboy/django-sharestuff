@@ -2,14 +2,6 @@
 
 {% block content %}
 
-{% if user.get_profile.notification_set.all %}
-<h4>Notifications</h4>
-{% for notification in user.get_profile.notification_set.all %}
-{{ notification.message|safe }}
-<hr />
-{% endfor %}
-{% endif %}
-
 <h3>What is this thing?</h3>
 
 <p>ShareStuff is a Freecycle-inspired tool to help you share your unwanted stuff with your community. At the moment it's still in development. It looks kind of horrible and has some rough edges, which I hope to fix at some point soon. It's already usable and useful though, so feel free to register, use it and send me any feedback.</p> 

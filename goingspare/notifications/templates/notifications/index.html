@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h4>Notifications</h4>
+{% if notifications %}
+{% for notification in notifications %}
+{{ notification.message|safe }}
+<hr />
+{% endfor %}
+{% else %}
+<p>You have no notifications.</p>
+{% endif %}
+
+{% endblock %}
