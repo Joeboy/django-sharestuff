@@ -3,11 +3,18 @@
 {% block content %}
 <h2>Offers</h2>
 
+<form action="" method="post">
+
+
+{{ form.as_p }}
+<input type="submit" value="Filter" />
+</form>
+
 {% if offers %}
     {% for offer in offers %}
         {{ offer.title }}
         <p>Offered by <strong>{{ offer.donor.get_best_name }}</strong>. <a href="{% url offer-contact offer.hash %}">Contact them about this offer</a></p>
-{% if offer.distance %}<p>Distance: {{ offer.distance|floatformat:1 }}km</p>{% endif %}
+{% if offer.distance == 0 or offer.distance %}<p>Distance: {{ offer.distance|floatformat:1 }}km</p>{% endif %}
         <hr />
     {% endfor %}
 {% else %}

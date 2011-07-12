@@ -92,6 +92,8 @@ INSTALLED_APPS = (
     'goingspare.oauth',
     'sentry',
     'sentry.client',
+    'taggit',
+    'taggit_templatetags',
 )
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'

@@ -2,6 +2,8 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 
+from taggit.managers import TaggableManager
+
 from userprofile.models import UserProfile
 import datetime
 import random
@@ -73,6 +75,7 @@ class LocalOffer(BaseOffer):
     hash = models.CharField(max_length=25, unique=True, db_index=True, blank=True)
 
     objects = OfferManager()
+    tags = TaggableManager()
 
     def get_absolute_url(self):
         return reverse('view-offer', kwargs={'offer_hash':self.hash})

@@ -6,10 +6,13 @@ from django.http import (HttpResponse, HttpResponseRedirect,
 from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
 from django import forms
 from django.forms.fields import Field, EMPTY_VALUES
 from django.shortcuts import get_object_or_404
-from django.db import connection, transaction
+from django.db import transaction
+
+from taggit.forms import TagField
 
 from offers.models import LocalOffer, OfferCategory, LocalOfferImage
 from userprofile.models import UserProfile, Subscription
@@ -20,6 +23,7 @@ from notifications.models import Notification
 from email_lists.models import EmailMessage
 
 CSV_RE = re.compile(r'^[\d,]*$')
+LOCALOFFER_CTYPE = ContentType.objects.get_for_model(LocalOffer).pk
 
 @login_required
 def search(request):
@@ -94,6 +98,7 @@ def edit_offer(request, offer=None):
             offer.longitude = userp.longitude
             offer.latitude = userp.latitude
             offer.save()
+            form.save_m2m()
             for im in form.cleaned_data['image_list']:
                 im.offer = offer
                 im.save()
@@ -200,28 +205,72 @@ def offer_category_tree(request, cat_id):
     return response
 
 
+class OfferFilterForm(forms.Form):
+    tags = TagField(required=False)
+    watched_users = forms.BooleanField(required=False)
+    max_distance = forms.IntegerField(label="Max distance (km)", required=False)
+    TAG_RE = re.compile(r'^[a-zA-Z0-9 -]+$')
+
+    def clean_tags(self, *args, **kwargs):
+        # Let's make really, really sure the user
+        # isn't able to inject SQL
+        tags = self.cleaned_data['tags']
+        for tag in tags:
+            if not self.TAG_RE.match(tag):
+                raise forms.ValidationError('Invalid characters in tag.')
+        return tags
+
+
+def build_select(userprofile, **kwargs):
+    """
+    Evil, evil function to construct sql for grabbing a filtered queryset
+    with added distance field. This function makes no attempt to clean or
+    validate its input, so be careful.
+    """
+    where = ''
+    join = ''
+    if kwargs.get('max_distance'):
+        where += " AND distance <= %d" % (kwargs['max_distance'],)
+    if kwargs.get('watched_users'):
+        where += ' and donor_id in (select to_userprofile_id from userprofile_userprofile_watched_users where from_userprofile_id=%s)' % userprofile.id
+    if kwargs.get('tags'):
+        tag_str = ", ".join(["E'%s'" % t for t in kwargs['tags']])
+        join = """
+INNER JOIN taggit_taggeditem ON (p.id = taggit_taggeditem.object_id) INNER JOIN taggit_tag ON (taggit_taggeditem.tag_id = taggit_tag.id)"""
+        where += """ and (taggit_tag.name IN (%s) AND taggit_taggeditem.content_type_id = %d)""" % (tag_str, LOCALOFFER_CTYPE)
+
+    sql = "select * from (select *, earth_distance(ll_to_earth(%s, %s), ll_to_earth(latitude, longitude))/1000 AS distance from offers_localoffer) as p %s WHERE TRUE %s" % (userprofile.latitude, userprofile.longitude, join, where)
+
+    return sql
+
+
 @login_required
 def others_offers(request):
     """
     List of offers from watched users
+    Be very careful to validate the input to build_select
     """
-    cursor = connection.cursor()
-    userp = request.user.get_profile()
-    sql = """
-SELECT title,
-       donor_id,
-       hash,
-       earth_distance(ll_to_earth(%s, %s), ll_to_earth(latitude, longitude))/1000
-FROM offers_localoffer where donor_id in (select to_userprofile_id from userprofile_userprofile_watched_users where from_userprofile_id=%s)
-    """
-    cursor.execute(sql, (userp.latitude, userp.longitude, userp.id))
-    offers = [{'title':row[0], 'donor':UserProfile.objects.get(id=row[1]), 'hash':row[2], 'distance':row[3]} for row in cursor.fetchall()]
+    userprofile = request.user.get_profile()
+
+    if request.POST:
+        form = OfferFilterForm(request.POST)
+        if form.is_valid():
+            sql = build_select(userprofile,
+                               watched_users=form.cleaned_data['watched_users'],
+                               tags=form.cleaned_data['tags'],
+                               max_distance=form.cleaned_data['max_distance'])
+    else:
+        form = OfferFilterForm()
+        sql = build_select(userprofile)
+
+    offers = LocalOffer.objects.raw(sql)
+
     return render_to_response_context(request,
                                       'offers/others_offers.html',
-                                      {'offers':offers})
+                                      {'form':form,
+                                       'offers':offers})
 
 def view_offer(request, offer_hash):
-    print request.is_ajax()
     offer = get_object_or_404(LocalOffer, hash=offer_hash)
     return render_to_response_context(request,
                                       'offers/offer.html',
