@@ -1,11 +1,35 @@
+* { margin: 0; padding: 0 }
+
+html, body , #container { height: 100%; }
+
 body {
     font-family:"lucida grande", tahoma, verdana, arial, sans-serif;
-    font-size: 85%;
+    font-size: 80%;
     margin:0px;
     padding:0px;
+}
+
+h1, h2, h3, h4 {
+    color: #363;
+}
+
+h1, h2, h3, h4, p, ul, li {
+    margin-bottom: 6px;
+}
+
+ul {
+    margin-left: 20px;
+}
+
+#container {
     max-width: 850px;
-    border-right: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+    border: 1px solid #ccc;
+    margin: 0px auto;
+    padding:0px;
+}
+
+#content {
+    padding: 14px;
 }
 
 #masthead {
@@ -60,11 +84,6 @@ body {
 #menu a {
     color:#fff;
     text-decoration:none;
-}
-
-#container {
-    margin:12px;
-    max-width:780px;
 }
 
 table {

@@ -14,6 +14,7 @@
 </head>
 
 <body>
+    <div id="container">
     <div id="masthead">
     <p><a href="/"><img src="/media/header.png" alt="sharestuff.org.uk" /></a>
     {% if user.get_profile.notification_set.unread %}<a id="notifications" href="{% url notifications %}">{{ user.get_profile.notification_set.unread.count }}</a>{% endif %}
@@ -28,9 +29,10 @@
         <div class="clear"></div>
     </div>
 
-	<div id="container">
-		{% block content %}{% endblock %}
-        <div style="clear:both"></div>
+    <div id="content">
+{% block content %}{% endblock %}
+    <div style="clear:both"></div>
+    </div>
 	</div>
 </body>
 </html>
