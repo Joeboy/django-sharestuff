@@ -15,34 +15,37 @@ Think of it like Freecycle for Web 2.0, or The Pirate Bay for physical objects.
 
 The short term plan
 -------------------
-
 The immediate plan is to create a quick and dirty Django app that:
 
- * Enables users to enter information about items they wish to give away
- * Serves up that information to the web, marked up using open formats
-   such as hListing
+ * Enables people to enter information about items they wish to give away
+ * Serves up that information to the web
+ * Allows people to easily share that information on freecycle, freegle etc
 
 Longer term plans
 -----------------
- * Enable users to aggregate and search other users' listings
- * Allow users to specify privacy settings for searches
- * Geographical searches
+ * Enable users to save searches, and create rss feeds of them
+ * More work on privacy options, which aren't really respected a the moment
+ * Think about integrating feeds from other systems. The main barrier being,
+   getting permission to do so
  * Think about integrating it into users' social graphs (ie. f***book)
- * Think further about how users will contact each other once one of them has
-   identified something they want
  * Wanted listings
+ * Use hListing or similar markup to allow easy scraping by other apps
  * An API
 
 Status
 ======
 
-Still lots to do before it's actually useful. So far it's possible for users to
-register and enter offer details, but searching those listings is still TODO.
+It's possible for users to register and enter offer details, share offers on
+freecycle/freegle, and search for offers.
 
 Getting it working
 ==================
 
-It's a pretty standard Django project, so I won't provide detailed instructions.
-Check it out, install the dependencies (which I will list at some point...), 
-copy localsettings.py.dist to localsettings.py, edit localsettings.py, then you
-should be able to do the syncdb and runserver shizzle.
+The project is written in the Django framework. To get it working you'll need
+to:
+ * Check out the project
+ * install the dependencies from the requirements.txt file
+ * copy localsettings.py.dist to localsettings.py, and edit localsettings.py to
+   your tastes
+ * Grab the mindmap geoip data by running the script `geoip/get_db.sh`
+ * If you did everything right, you should be able to syncdb and runserver.
