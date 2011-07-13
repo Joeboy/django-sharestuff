@@ -104,6 +104,8 @@ LOGIN_REDIRECT_URL = '/'
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
+GEOIP_PATH = os.path.join(PROJECT_DIR, 'geoip')
+
 try:
     from localsettings import *
 except ImportError:

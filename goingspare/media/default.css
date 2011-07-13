@@ -23,7 +23,9 @@ ul {
 
 #container {
     max-width: 850px;
-    border: 1px solid #ccc;
+    border-width: 0px 1px 0px 1px;
+    border-style: solid;
+    border-color: #aca;
     margin: 0px auto;
     padding:0px;
 }

@@ -33,8 +33,8 @@ class BaseOffer(models.Model):
     description = models.TextField()
     date_time_added = models.DateTimeField(blank=True, default=datetime.datetime.now)
 
-    latitude = models.FloatField(blank=True, null=True)
-    longitude = models.FloatField(blank=True, null=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
     
     class Meta:
         abstract = True

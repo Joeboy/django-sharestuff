@@ -1,15 +1,122 @@
 {% extends 'base.html' %}
 
+{% block extrahead %}
+<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAA0okLrKZhiNabzBlBE2rJHRQRB3d2m0eE07bem--pb7XcM7LibBS3sJZUsLLOaucwIRuf8Q4305bVSw"></script>
+
+<script type="text/javascript">
+google.load("maps", "2");
+jQuery(function() {
+    var location_source = jQuery('#id_location_source').val();
+    var location_desc;
+    var update_location_desc = function(location_desc) {
+        jQuery('#location-desc').html(location_desc);
+    };
+    var update_estimated_location_desc = function() {
+        var lat = jQuery('#id_latitude').val();
+        var lon = jQuery('#id_longitude').val();
+        update_location_desc(' km of your <a href="" id="estimated-location">estimated location</a>');
+        jQuery('#estimated-location').click(function() {
+            jQuery('#location-dialog').dialog();
+            var userMap = new GMap2(jQuery('#map-placeholder').get(0));
+            userMap.setCenter(new GLatLng(lat, lon), 9);
+            var userMarker = new GMarker(new GLatLng(lat, lon), {draggable: false});
+            userMap.addOverlay(userMarker);
+            return false;
+        });
+    };
+    var use_geolocation = function(position) {
+        jQuery('#id_latitude').val(position.coords.latitude);
+        jQuery('#id_longitude').val(position.coords.longitude);
+        update_estimated_location_desc();
+        jQuery('#id_location_source').val('browser');
+    };
+    var geolocation_error = function() {
+        console.log('geofail');
+    };
+
+    if (location_source == 'userprofile') {
+        update_location_desc(' km of <a href="{% url edit-userprofile %}">your location</a>');
+    } else {
+        if (location_source == 'ip') {
+            update_estimated_location_desc();
+        } else {
+            jQuery('#id_latitude').val('52.63639666');
+            jQuery('#id_longitude').val('1.29432678223');
+            update_location_desc(' km of Norwich City Centre. Your don\'t have a location set in your userprofile, and I was unable to guess one, so Norwich it is.');
+        }
+         
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(use_geolocation, geolocation_error);
+        }
+    }
+
+    var update_offers = function(offers) {
+        var offer_list = jQuery('<p>'+ offers.length + ' offers found.</p>');
+        for (var i=0;i<offers.length; i++) {
+            offer = offers[i];
+            offer_list.append('<h4><a href="/offers/view/'+offer.hash+'/">'+offer.title+'</a></h4><p>Offered by <strong>'+offer.donor_name+'</strong>. <a href="/offers/contact/'+offer.hash+'/">Contact them about this offer</a></p></p>');
+            if (offer.distance != null) {
+                offer_list.append('<p>Distance: '+Math.round(offer.distance)+'km</p>');
+            }
+        }
+        jQuery('#offer-list').html(offer_list);
+        return false
+    };
+
+    var update_errors = function(errors) {
+        var error_output = '<p>The following fields had errors:</p><ul>';
+        for (var fieldname in errors) {
+            error_output +='<li>'+fieldname+':<ul>';
+            for (var i = 0;i<errors[fieldname].length;i++) {
+                error_output += '<li>'+errors[fieldname][i]+'</li>';
+            }
+            error_output += '</ul></li>';
+        }
+        error_output += '</ul>';
+        jQuery('#errors').empty();
+        jQuery('#errors').append(error_output);
+    }
+
+    jQuery('#offer-filter-form').ajaxForm({
+        dataType:'json',
+        success: function(data) {
+            jQuery('#errors').empty();
+            if (data.errors) {
+                update_errors(data.errors);
+            } else {
+                update_offers(data.offers);
+            }
+        }});
+});
+</script>
+{% endblock %}
+
 {% block content %}
+<div id="location-dialog" style="display:none">
+      <div style="height:200px;" id="map-placeholder"></div>
+        <p>This is my best guess at your location. If it's wrong you can change it 
+        {% if request.user.is_authentication %}
+        in your user settings - click the 'You' button at the top of the page.
+        {% else %}
+        by logging in and changing your user settings.
+        {% endif %}
+        </p>
+</div>
+
 <h2>Offers</h2>
 
-<form action="" method="post">
-
-
-{{ form.as_p }}
+<form id="offer-filter-form" action="" method="post">
+<div id="errors"></div>
+<p>Tags: {{ form.tags }}</p>
+<p>Watched users only: {{ form.watched_users }}</p>
+<p>Within {{ form.max_distance }}<span id="location-desc"> km</span></p>
+{{ form.latitude }}
+{{ form.longitude }}
+{{ form.location_source }}
 <input type="submit" value="Filter" />
 </form>
 
+<div id="offer-list">
 {% if offers %}
     {% for offer in offers %}
         {{ offer.title }}
@@ -18,7 +125,7 @@
         <hr />
     {% endfor %}
 {% else %}
-    <p>No offers found</p>
 {% endif %}
+</div>
 
 {% endblock %}

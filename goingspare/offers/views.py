@@ -1,5 +1,4 @@
 import re
-import json
 
 from django.http import (HttpResponse, HttpResponseRedirect,
                          HttpResponseServerError)
@@ -11,6 +10,8 @@ from django import forms
 from django.forms.fields import Field, EMPTY_VALUES
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.contrib.gis.utils import GeoIP
+from django.core.exceptions import PermissionDenied
 
 from taggit.forms import TagField
 
@@ -18,6 +19,7 @@ from offers.models import LocalOffer, OfferCategory, LocalOfferImage
 from userprofile.models import UserProfile, Subscription
 
 from goingspare.utils import render_to_response_context
+from goingspare.utils.http import JsonResponse
 from goingspare.offers.decorators import user_offer
 from notifications.models import Notification
 from email_lists.models import EmailMessage
@@ -208,7 +210,11 @@ def offer_category_tree(request, cat_id):
 class OfferFilterForm(forms.Form):
     tags = TagField(required=False)
     watched_users = forms.BooleanField(required=False)
-    max_distance = forms.IntegerField(label="Max distance (km)", required=False)
+    max_distance = forms.IntegerField(label="Max distance (km)")
+    latitude = forms.FloatField(widget=forms.HiddenInput)
+    longitude = forms.FloatField(widget=forms.HiddenInput)
+    location_source = forms.CharField(widget=forms.HiddenInput)
+
     TAG_RE = re.compile(r'^[a-zA-Z0-9 -]+$')
 
     def clean_tags(self, *args, **kwargs):
@@ -221,54 +227,152 @@ class OfferFilterForm(forms.Form):
         return tags
 
 
-def build_select(userprofile, **kwargs):
+def get_offers(**params):
     """
-    Evil, evil function to construct sql for grabbing a filtered queryset
+    Evil, evil function to construct sql and grab a filtered queryset
     with added distance field. This function makes no attempt to clean or
     validate its input, so be careful.
+
+    Also, the current sql will scale abysmally and will need redoing
     """
     where = ''
     join = ''
-    if kwargs.get('max_distance'):
-        where += " AND distance <= %d" % (kwargs['max_distance'],)
-    if kwargs.get('watched_users'):
-        where += ' and donor_id in (select to_userprofile_id from userprofile_userprofile_watched_users where from_userprofile_id=%s)' % userprofile.id
-    if kwargs.get('tags'):
-        tag_str = ", ".join(["E'%s'" % t for t in kwargs['tags']])
+    (latitude,
+     longitude,
+     max_distance,
+     watched_users, ) = (params.get('latitude'),
+                         params.get('longitude'),
+                         params.get('max_distance'),
+                         params.get('watched_users'), )
+
+    if max_distance:
+        where += " AND distance <= %d" % (max_distance,)
+    if watched_users:
+        if params.get('asking_userprofile'):
+            asking_userprofile = params['asking_userprofile']
+        else:
+            raise PermissionDenied
+        where += ' and donor_id in (select to_userprofile_id from userprofile_userprofile_watched_users where from_userprofile_id=%s)' % asking_userprofile.id
+    if params.get('tags'):
+        tag_str = ", ".join(["E'%s'" % t for t in params['tags']])
         join = """
 INNER JOIN taggit_taggeditem ON (p.id = taggit_taggeditem.object_id) INNER JOIN taggit_tag ON (taggit_taggeditem.tag_id = taggit_tag.id)"""
         where += """ and (taggit_tag.name IN (%s) AND taggit_taggeditem.content_type_id = %d)""" % (tag_str, LOCALOFFER_CTYPE)
 
-    sql = "select * from (select *, earth_distance(ll_to_earth(%s, %s), ll_to_earth(latitude, longitude))/1000 AS distance from offers_localoffer) as p %s WHERE TRUE %s" % (userprofile.latitude, userprofile.longitude, join, where)
+    sql = "select * from (select *, earth_distance(ll_to_earth(%s, %s), ll_to_earth(latitude, longitude))/1000 AS distance from offers_localoffer) as p %s WHERE TRUE %s" % (latitude, longitude, join, where)
 
-    return sql
+    return LocalOffer.objects.raw(sql)
 
 
 @login_required
 def others_offers(request):
     """
     List of offers from watched users
-    Be very careful to validate the input to build_select
+    Be very careful to validate the input to get_offers
     """
     userprofile = request.user.get_profile()
 
     if request.POST:
         form = OfferFilterForm(request.POST)
         if form.is_valid():
-            sql = build_select(userprofile,
-                               watched_users=form.cleaned_data['watched_users'],
-                               tags=form.cleaned_data['tags'],
-                               max_distance=form.cleaned_data['max_distance'])
+            offers = get_offers(latitude=form.cleaned_data['latitude'],
+                                longitude = form.cleaned_data['longitude'],
+                                watched_users=form.cleaned_data['watched_users'],
+                                asking_userprofile = userprofile,
+                                tags=form.cleaned_data['tags'],
+                                max_distance=form.cleaned_data['max_distance'])
+        else:
+            if request.is_ajax():
+                return JsonResponse({'errors':form.errors})
+            else:
+                return render_to_response_context(
+                    request,
+                    'offers/others_offers.html',
+                    {'form':form,
+                     'offers':[]})
     else:
-        form = OfferFilterForm()
-        sql = build_select(userprofile)
+        if userprofile.latitude and userprofile.longitude:
+            lat, lon = userprofile.latitude, userprofile.longitude
+            location_source = 'userprofile'
+        else:
+            g = GeoIP()
+            ip = request.META.get('REMOTE_ADDR')
+            lat, lon = 52.63639666, 1.29432678223
+            location_source = 'none'
+            if ip:
+                latlon = g.lat_lon(ip)
+                if latlon:
+                    lat, lon = latlon
+                    location_source = 'ip'
+        form = OfferFilterForm(initial={'max_distance': 25,
+                                        'latitude':lat,
+                                        'longitude':lon,
+                                        'location_source':location_source})
+        offers = []
 
-    offers = LocalOffer.objects.raw(sql)
+    if request.is_ajax():
+        data = {'offers': [{'id':o.id,
+                            'title':o.title,
+                            'description':o.description,
+                            'distance':o.distance,
+                            'hash':o.hash,
+                            'donor_name': o.donor.get_best_name()} for o in offers]}
 
-    return render_to_response_context(request,
-                                      'offers/others_offers.html',
-                                      {'form':form,
-                                       'offers':offers})
+        return JsonResponse(data)
+    else:
+        return render_to_response_context(request,
+                                          'offers/others_offers.html',
+                                          {'form':form,
+                                           'offers':offers})
+
+
+#@login_required
+#def xxxothers_offers(request):
+#    """
+#    redundant, I think
+#    List of offers from watched users
+#    Be very careful to validate the input to build_select
+#    """
+#    if True or request.is_ajax():
+#        return others_offers_ajax(request)
+#
+#    userprofile = request.user.get_profile()
+#
+#
+#    if request.POST:
+#        form = OfferFilterForm(request.POST)
+#        if form.is_valid():
+#            sql = build_select(userprofile,
+#                               watched_users=form.cleaned_data['watched_users'],
+#                               tags=form.cleaned_data['tags'],
+#                               max_distance=form.cleaned_data['max_distance'])
+#            offers = LocalOffer.objects.raw(sql)
+#        else:
+#            offers = None
+#    else:
+#        if userprofile.latitude and userprofile.longitude:
+#            lat, lon = userprofile.latitude, userprofile.longitude
+#            location_source = 'userprofile'
+#        else:
+#            g = GeoIP()
+#            ip = request.META.get('REMOTE_ADDR')
+#            lat, lon = 52.63639666, 1.29432678223
+#            location_source = 'none'
+#            if ip:
+#                latlon = g.lat_lon(ip)
+#                if latlon:
+#                    lat, lon = latlon
+#                    location_source = 'ip'
+#        form = OfferFilterForm(initial={'max_distance': 25,
+#                                        'latitude':lat,
+#                                        'longitude':lon,
+#                                        'location_source':location_source})
+#        offers = None
+#
+#    return render_to_response_context(request,
+#                                      'offers/others_offers.html',
+#                                      {'form':form,
+#                                       'offers':offers})
 
 def view_offer(request, offer_hash):
     offer = get_object_or_404(LocalOffer, hash=offer_hash)

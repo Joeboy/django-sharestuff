@@ -4,3 +4,4 @@ goingspare/*.sqlite
 *.swp
 goingspare/media/offer_images/local/*.jpg
 goingspare/media/offer_images/local/*.png
+goingspare/geoip/*.dat
