@@ -9,7 +9,7 @@
         <div class="{% cycle 'light-row' 'dark-row' %}">
         {% if offer.localofferimage_set.all %}
         <div style="float:right" class="small-thumb">
-        <a href="{{ offer.localofferimage_set.all.0.image.url }}"><img title="{{ offer.localofferimage_set.all.0.caption }}" src="{{ offer.localofferimage_set.all.0.image.url }}" /></a>
+        <a href="{{ offer.localofferimage_set.all.0.image.url }}"><img title="{{ offer.localofferimage_set.all.0.caption }}" alt="{{ offer.localofferimage_set.all.0.caption }}" src="{{ offer.localofferimage_set.all.0.image.url }}" /></a>
         </div>
         {% endif %}
         <h4><a href="{% url view-offer offer.hash %}">{{offer.title}}</a></h4>
@@ -28,5 +28,7 @@
     <p><a href="{% url watch-user donor.id %}">Watch this user's offers</a></p>
     {% endif %}
 {% endif %}
+
+<p style="text-align:right;"><a href="{% url user-offers-rss donor.user.username %}"><img src="/media/rss.png" alt="RSS feed" /> RSS</a></p>
 
 {% endblock %}

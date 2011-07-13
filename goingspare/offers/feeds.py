@@ -4,9 +4,8 @@ from django.utils.feedgenerator import Atom1Feed
 from django.contrib.syndication.views import Feed
 
 class UserActivityFeed(Feed):
-    feed_type = Atom1Feed
-    def get_object(self, request, user_id):
-        return get_object_or_404(UserProfile, id=user_id)
+    def get_object(self, request, username):
+        return get_object_or_404(UserProfile, user__username=username)
 
     def link(self, user):
         return user.get_absolute_url()
