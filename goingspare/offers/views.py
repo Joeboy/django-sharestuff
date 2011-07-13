@@ -326,6 +326,14 @@ def others_offers(request):
                                            'offers':offers})
 
 
+def user_offers(request, username):
+    donor = get_object_or_404(UserProfile, user__username=username)
+    offers = LocalOffer.objects.filter(donor=donor)
+    return render_to_response_context(request,
+                                      'offers/user_offers.html',
+                                      {'offers':offers,
+                                       'donor':donor})
+    
 #@login_required
 #def xxxothers_offers(request):
 #    """

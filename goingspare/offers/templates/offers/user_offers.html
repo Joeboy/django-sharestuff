@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{donor.get_best_name}}</h2>
+
+{% if donor.localoffer_set.all %}
+<h3>Offers:</h3>
+    {% for offer in donor.localoffer_set.all %}
+        <div class="{% cycle 'light-row' 'dark-row' %}">
+        {% if offer.localofferimage_set.all %}
+        <div style="float:right" class="small-thumb">
+        <a href="{{ offer.localofferimage_set.all.0.image.url }}"><img title="{{ offer.localofferimage_set.all.0.caption }}" src="{{ offer.localofferimage_set.all.0.image.url }}" /></a>
+        </div>
+        {% endif %}
+        <h4><a href="{% url view-offer offer.hash %}">{{offer.title}}</a></h4>
+        {{offer.description|truncatewords:100}}
+        <div style="clear:both"></div>
+        </div>
+    {% endfor %}
+{% else %}
+    <h3>No offers</h3>
+{% endif %}
+
+{% if user.is_authenticated %}
+    {% if userprofile in user.get_profile.watched_users.all %}
+    <p><a href="{% url unwatch-user donor.id %}">Stop watching this user's offers</a></p>
+    {% else %}
+    <p><a href="{% url watch-user donor.id %}">Watch this user's offers</a></p>
+    {% endif %}
+{% endif %}
+
+{% endblock %}
