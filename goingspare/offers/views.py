@@ -28,14 +28,6 @@ from email_lists.models import EmailMessage
 CSV_RE = re.compile(r'^[\d,]*$')
 LOCALOFFER_CTYPE = ContentType.objects.get_for_model(LocalOffer).pk
 
-@login_required
-def search(request):
-    """
-    Search for offers
-    """
-    raise NotImplemented
-    return render_to_response_context(request, 'offers/search.html')
-
 
 @login_required
 def my_offers(request):
@@ -76,14 +68,14 @@ def edit_offer(request, offer=None):
     """
     Edit or create a user's offer
     """
-    userp = request.user.get_profile()
+    userprofile = request.user.get_profile()
     if request.method == 'POST':
         form = OfferForm(request.POST, instance=offer)
         if form.is_valid():
             offer = OfferForm.save(form, commit=False)
-            offer.donor = userp
-            offer.longitude = userp.longitude
-            offer.latitude = userp.latitude
+            offer.donor = userprofile
+            offer.longitude = userprofile.longitude
+            offer.latitude = userprofile.latitude
             offer.save()
             form.save_m2m()
             for im in form.cleaned_data['image_list']:
@@ -94,13 +86,21 @@ def edit_offer(request, offer=None):
             return HttpResponseRedirect(reverse('my-offers'))
     else:
         if offer is None:
-            form = OfferForm(initial={'latitude':userp.latitude,
-                                      'longitude':userp.longitude})
+            initial={'latitude':userprofile.latitude,
+                     'longitude':userprofile.longitude}
+            for action in 'list', 'show':
+                for who in 'public', 'sharestuffers', 'watchers':
+                    initial['%s_%s' % (action, who)] = getattr(userprofile, 'offers_%s_%s' % (action, who))
+
+            form = OfferForm(initial=initial)
+            initial['list_public'] = userprofile.offers_list_public
         else:
             form = OfferForm(instance=offer, initial={'image_list':','.join([str(im.id) for im in offer.localofferimage_set.all()])})
 
+    privacy_fields = [form.fields[k] for k in ('list_public', 'list_sharestuffers', 'list_watchers')]
     return render_to_response_context(request, 'offers/edit_offer.html', {'form': form,
                                                                           'offer': offer,
+                                                                          'privacy_fields': privacy_fields,
                                                                           'image_list': offer and offer.image_list or '[]'})
 
 

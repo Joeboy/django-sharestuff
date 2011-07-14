@@ -23,18 +23,6 @@
     <p>{{ userprofile_form.postcode.label }}:
     {{ userprofile_form.postcode }}</p>
 
-    <p>About me:</p>
-    <p>{{ userprofile_form.info }}</p>
-
-    <p>{{ userprofile_form.notify_following.label }}:</p>
-    <p>{{ userprofile_form.notify_following }}</p>
-
-    <p>{{ userprofile_form.confirm_following.label }}:</p>
-    <p>{{ userprofile_form.confirm_following }}</p>
-
-    <p>{{ userprofile_form.public_offers.label }}:</p>
-    <p>{{ userprofile_form.public_offers }}</p>
-
     <h4>Location</h4>
     {% if userprofile_form.initial.latitude %}
     <p>The map below indicates your location. To change your location drag the marker to your preferred location, or type your postcode into the postcode box.</p>
@@ -48,6 +36,41 @@
     {{ userprofile_form.latitude }}</p>
     <p>{{ userprofile_form.longitude.label }}:
     {{ userprofile_form.longitude }}</p>
+
+
+    <p>About me:</p>
+    <p>{{ userprofile_form.info }}</p>
+
+    <h4>Privacy stuff. This is a work in progress - please don't assume these will work!</h4>
+    <fieldset>
+        <p>{{ userprofile_form.notify_following.label }}:
+        {{ userprofile_form.notify_following }}</p>
+
+        <p>{{ userprofile_form.confirm_following.label }}:
+        {{ userprofile_form.confirm_following }}</p>
+    </fieldset>
+
+    <fieldset>
+    <p>Unless I say otherwise for individual offers, I would like to:</p>
+    <p>{{ userprofile_form.offers_list_public.label }}:
+    {{ userprofile_form.offers_list_public }}</p>
+
+    <p>{{ userprofile_form.offers_list_sharestuffers.label }}:
+    {{ userprofile_form.offers_list_sharestuffers }}</p>
+
+    <p>{{ userprofile_form.offers_list_watchers.label }}:
+    {{ userprofile_form.offers_list_watchers }}</p>
+
+    <p>{{ userprofile_form.offers_show_public.label }}:
+    {{ userprofile_form.offers_show_public }}</p>
+
+    <p>{{ userprofile_form.offers_show_sharestuffers.label }}:
+    {{ userprofile_form.offers_show_sharestuffers }}</p>
+
+    <p>{{ userprofile_form.offers_show_watchers.label }}:
+    {{ userprofile_form.offers_show_watchers }}</p>
+    </fieldset>
+
 
     <input type="submit" value="Update my details" />
 </form>

@@ -32,13 +32,13 @@ class UserProfile(models.Model):
     notify_following = models.BooleanField("Notify me when somebody asks to follow me", default=True)
     confirm_following = models.BooleanField("Ask me for permission before allowing people to follow me")
 
-    offers_list_public = models.BooleanField("Show my offers' listings to anybody")
-    offers_list_sharestuffers = models.BooleanField("Show my offers' listings to people logged into ShareStuff")
-    offers_list_watchers = models.BooleanField("Show my offers' listings to people watching me")
+    offers_list_public = models.BooleanField("Show my offers' listings to anybody", default=True)
+    offers_list_sharestuffers = models.BooleanField("Show my offers' listings to people logged into ShareStuff", default=True)
+    offers_list_watchers = models.BooleanField("Show my offers' listings to people watching me", default=True)
 
     offers_show_public = models.BooleanField("Show my offers' details to anybody")
-    offers_show_sharestuffers = models.BooleanField("Show my offers' details to people logged into ShareStuff")
-    offers_show_watchers = models.BooleanField("Show my offers' details to people watching me")
+    offers_show_sharestuffers = models.BooleanField("Show my offers' details to people logged into ShareStuff", default=True)
+    offers_show_watchers = models.BooleanField("Show my offers' details to people watching me", default=True)
     
 
     watched_users = models.ManyToManyField('UserProfile', blank=True, related_name="watchers")

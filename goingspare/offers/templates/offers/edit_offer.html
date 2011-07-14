@@ -2,8 +2,17 @@
 
 {% block extrahead %}{{block.super}}
 <script type="text/javascript">
-    var offer_id = parseInt("{{ offer.id }}");
-    var images = {{ image_list|safe }};
+var offer_id = parseInt("{{ offer.id }}");
+var images = {{ image_list|safe }};
+
+jQuery(function() {
+    var privacy_options = jQuery('#privacy-options');
+    privacy_options.hide();
+    jQuery('#toggle-privacy-options').click(function() {
+        privacy_options.toggle();
+        return false;
+    });
+});
 </script>
 {{ form.media }}
 {% endblock %}
@@ -21,6 +30,18 @@
 <p>{{form.description}}</p>
 <p><label for="id_live_status">{{ form.live_status.label }}</label>: {{form.live_status}}</p>
 <p><label for="id_tags">{{ form.tags.label }}: {{ form.tags }}</p>
+
+<p><a id="toggle-privacy-options" href="">Privacy options</a></p>
+
+<div id="privacy-options">
+<p><label for="id_list_public">{{ form.list_public.label }}: {{ form.list_public }}</p>
+<p><label for="id_list_sharestuffers">{{ form.list_sharestuffers.label }}: {{ form.list_sharestuffers }}</p>
+<p><label for="id_list_watchers">{{ form.list_watchers.label }}: {{ form.list_watchers }}</p>
+
+<p><label for="id_show_public">{{ form.show_public.label }}: {{ form.show_public }}</p>
+<p><label for="id_show_sharestuffers">{{ form.show_sharestuffers.label }}: {{ form.show_sharestuffers }}</p>
+<p><label for="id_show_watchers">{{ form.show_watchers.label }}: {{ form.show_watchers }}</p>
+</div>
 
 {{ form.image_list }}
 
