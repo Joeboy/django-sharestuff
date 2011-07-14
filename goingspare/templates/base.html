@@ -21,7 +21,7 @@
     </p>
 		<ul id="menu">
 {% if user.is_authenticated %}
-<li><a href="{% url edit-userprofile %}">You</a></li><li><a href="{% url my-offers %}">Your offers</a></li><li><a href="{% url user-list %}">Other people</a></li><li><a href="{% url others-offers %}">Other people's offers</a></li><li><a href="/user/logout/">Log out</a></li>
+<li><a href="{% url edit-userprofile %}">You</a></li><li><a href="{% url my-offers %}">Your offers</a></li><li><a href="{% url user-list %}">Other people</a></li><li><a href="{% url browse-offers %}">Other people's offers</a></li><li><a href="/user/logout/">Log out</a></li>
 {% else %}
 <li><a href="/user/login/">Log in</a></li><li><a href="/user/register/">Register</a></li>
 {% endif %}

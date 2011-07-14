@@ -33,5 +33,5 @@ jQuery(function() {
 </p>
 {% endif %}
 
-<p><a href="{% url user-offers offer.donor.user.username %}">View {{ offer.donor.get_best_name }}'s other offers</a></p>
+<p><a href="{% url user-offers offer.donor.user.username %}">View all {{ offer.donor.localoffer_set.count }} of {{ offer.donor.get_best_name }}'s offers</a></p>
 {% endblock %}

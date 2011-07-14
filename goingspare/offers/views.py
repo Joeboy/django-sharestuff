@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django import forms
 from django.forms.fields import Field, EMPTY_VALUES
+from django.forms.util import ErrorList
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.contrib.gis.utils import GeoIP
@@ -49,23 +50,7 @@ class CategoryWidget(forms.TextInput):
         js = ('js/stuff_category_widget.js',)
 
 
-class RawModelChoiceField(forms.ModelChoiceField):
-    def clean(self, value):
-        Field.clean(self, value)
-        if value in EMPTY_VALUES:
-            return None
-        if not re.match('^\d+$', value):
-            raise forms.ValidationError("Invalid category id")
-        try:
-            key = self.to_field_name or 'pk'
-            value = self.queryset.get(**{key: value})
-        except self.queryset.model.DoesNotExist:
-            raise forms.ValidationError(self.error_messages['invalid_choice'])
-        return value
-
-
 class OfferForm(forms.ModelForm):
-#    category=RawModelChoiceField(queryset=OfferCategory.objects.all(), widget=CategoryWidget)
     image_list = forms.CharField(widget=forms.HiddenInput, required=False)
 
     def clean_image_list(self):
@@ -217,6 +202,7 @@ class OfferFilterForm(forms.Form):
 
     TAG_RE = re.compile(r'^[a-zA-Z0-9 -]+$')
 
+
     def clean_tags(self, *args, **kwargs):
         # Let's make really, really sure the user
         # isn't able to inject SQL
@@ -226,53 +212,119 @@ class OfferFilterForm(forms.Form):
                 raise forms.ValidationError('Invalid characters in tag.')
         return tags
 
+class OfferListForm(OfferFilterForm):
+    donor = forms.CharField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(OfferListForm, self).__init__(*args, **kwargs)
+        del self.fields['location_source']
+        del self.fields['watched_users']
+        for k in ('longitude', 'latitude', 'max_distance'):
+            self.fields[k].required = False
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        if cleaned_data.get('donor'):
+            try:
+                cleaned_data['donorprofile'] = UserProfile.objects.get(user__username=cleaned_data['donor'])
+            except UserProfile.DoesNotExist:
+                self._errors['donor'] = ErrorList(['No such user'])
+        else:
+            cleaned_data['donorprofile'] = None
+            for k in ('latitude', 'longitude', 'max_distance'):
+                if cleaned_data.get(k) is None:
+                    self._errors[k] = ErrorList(['This field is required'])
+                    
+        return cleaned_data
+
+
 
 def get_offers(**params):
     """
-    Evil, evil function to construct sql and grab a filtered queryset
-    with added distance field. This function makes no attempt to clean or
-    validate its input, so be careful.
+    Function to grab a filtered queryset with added distance field.
 
-    Also, the current sql will scale abysmally and will need redoing
+    The current sql will scale abysmally and will need redoing if the site gets
+    a significant number of users
+
+    Also also, this should probably live with the model
     """
-    where = ''
-    join = ''
-    (latitude,
+    (donorprofile,
+     latitude,
      longitude,
      max_distance,
-     watched_users, ) = (params.get('latitude'),
-                         params.get('longitude'),
-                         params.get('max_distance'),
-                         params.get('watched_users'), )
+     watched_users,
+     asking_userprofile,
+     tags) = (params.get('donorprofile'),
+              params.get('latitude'),
+              params.get('longitude'),
+              params.get('max_distance'),
+              params.get('watched_users'),
+              params.get('asking_userprofile'),
+              params.get('tags'), )
 
-    if max_distance:
-        where += " AND distance <= %d" % (max_distance,)
+    offers = LocalOffer.objects.all()
+
     if watched_users:
-        if params.get('asking_userprofile'):
-            asking_userprofile = params['asking_userprofile']
-        else:
-            raise PermissionDenied
-        where += ' and donor_id in (select to_userprofile_id from userprofile_userprofile_watched_users where from_userprofile_id=%s)' % asking_userprofile.id
-    if params.get('tags'):
-        tag_str = ", ".join(["E'%s'" % t for t in params['tags']])
-        join = """
-INNER JOIN taggit_taggeditem ON (p.id = taggit_taggeditem.object_id) INNER JOIN taggit_tag ON (taggit_taggeditem.tag_id = taggit_tag.id)"""
-        where += """ and (taggit_tag.name IN (%s) AND taggit_taggeditem.content_type_id = %d)""" % (tag_str, LOCALOFFER_CTYPE)
+        if not asking_userprofile:
+            raise PermissionDenied("If you specify watched_users, you must also specify asking_userprofile.")
+        offers = offers.filter(donor__in=asking_userprofile.watched_users.all())
 
-    sql = "select * from (select *, earth_distance(ll_to_earth(%s, %s), ll_to_earth(latitude, longitude))/1000 AS distance from offers_localoffer) as p %s WHERE TRUE %s" % (latitude, longitude, join, where)
+    if tags:
+        offers = offers.filter(tags__name__in=tags)
 
-    return LocalOffer.objects.raw(sql)
+    if donorprofile:
+        offers = offers.list_for_user(asking_userprofile)
+
+    if longitude is not None and latitude is not None:
+        offers = offers.with_distances(latitude, longitude)
+
+        if max_distance is not None:
+            # This is way inefficient - TODO: do some prefiltering based on
+            # cheaper geometry
+            sql = "select *, distance from (%s) as x where distance<%s" % (unicode(offers.query), max_distance)
+            offers = LocalOffer.objects.raw(sql)
+
+    return offers
 
 
-@login_required
-def others_offers(request):
+def list_offers(request):
+    """
+    Sorta the same as browse_offers, but for direct linking rather than
+    filtering via a form
+    """
+    if request.user.is_authenticated():
+        userprofile = request.user.get_profile()
+    else:
+        userprofile = None
+    form = OfferListForm(request.GET)
+    if form.is_valid():
+        offers = get_offers(donorprofile=form.cleaned_data['donorprofile'],
+                            latitude=form.cleaned_data['latitude'],
+                            longitude = form.cleaned_data['longitude'],
+                            asking_userprofile = userprofile,
+                            tags=form.cleaned_data['tags'],
+                            max_distance=form.cleaned_data['max_distance'])
+        return render_to_response_context(
+                    request,
+                    'offers/list_offers.html',
+                    {'offers':offers})
+    else:
+        print form.errors
+        return HttpResponse("invalid")
+
+#@login_required
+def browse_offers(request):
     """
     List of offers from watched users
     Be very careful to validate the input to get_offers
     """
-    userprofile = request.user.get_profile()
 
-    if request.POST:
+    if request.user.is_authenticated():
+        userprofile = request.user.get_profile()
+    else:
+        userprofile = None
+
+    if request.method == 'POST':
         form = OfferFilterForm(request.POST)
         if form.is_valid():
             offers = get_offers(latitude=form.cleaned_data['latitude'],
@@ -291,7 +343,7 @@ def others_offers(request):
                     {'form':form,
                      'offers':[]})
     else:
-        if userprofile.latitude and userprofile.longitude:
+        if userprofile and userprofile.latitude and userprofile.longitude:
             lat, lon = userprofile.latitude, userprofile.longitude
             location_source = 'userprofile'
         else:
@@ -384,6 +436,7 @@ def user_offers(request, username):
 
 def view_offer(request, offer_hash):
     offer = get_object_or_404(LocalOffer, hash=offer_hash)
+#    if request.user.is_anonymous() and not offer.show_public:
     return render_to_response_context(request,
                                       'offers/offer.html',
                                       {'offer':offer})

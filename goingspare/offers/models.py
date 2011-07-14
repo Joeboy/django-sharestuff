@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 
@@ -32,6 +33,12 @@ class BaseOffer(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     date_time_added = models.DateTimeField(blank=True, default=datetime.datetime.now)
+    list_public = models.BooleanField("Show listing to anybody")
+    list_sharestuffers = models.BooleanField("Show listing to people logged into ShareStuff")
+    list_watchers = models.BooleanField("Show listing to people watching me")
+    show_public = models.BooleanField("Show details to anybody")
+    show_sharestuffers = models.BooleanField("Show details to people logged into ShareStuff")
+    show_watchers = models.BooleanField("Show details to people watching me")
 
     latitude = models.FloatField()
     longitude = models.FloatField()
@@ -46,15 +53,20 @@ class BaseOffer(models.Model):
 
 class OfferManager(models.Manager):
     """
-    Manager to make it easier to filter for live items
+    Manager that adds the ability to create custom queryset methods, and also
+    allows access to those methods by the manager itself
     """
     
-    def live(self):
-        """
-        Return a queryset of the 'live' offers (offers that have been moderated and are still available)
-        """
-        return self.filter(live_status=True)
+    def get_query_set(self):
+        return self.model.QuerySet(self.model)
 
+    def list_for_user(self, userprofile):
+        return self.get_query_set().list_for_user(userprofile)
+        
+    def with_distances(self, longitude, latitude):
+        return self.get_query_set().with_distances(longitude, latitude)
+        
+    
 
 class LocalOffer(BaseOffer):
     """
@@ -77,6 +89,26 @@ class LocalOffer(BaseOffer):
     objects = OfferManager()
     tags = TaggableManager()
 
+    class QuerySet(models.query.QuerySet):
+        def with_distances(self, latitude, longitude):
+            """
+            Add distances to the query results using pg's earth_distance function
+            """
+            return self.extra(select={'distance':'earth_distance(ll_to_earth(%s,%s), ll_to_earth(offers_localoffer.latitude, offers_localoffer.longitude))/1000'}, select_params=(latitude, longitude))
+        
+        def list_for_user(self, userprofile):
+            """
+            Filter the list down to offers the user has permission to see
+            listed
+            """
+            q = Q(list_public=True)
+            if userprofile:
+                q |= Q(list_sharestuffers=True)
+                q |= (Q(list_watchers=True) & Q(donor__watchers__in=[userprofile]))
+
+            return self.filter(Q(live_status=True) & q)
+
+
     def get_absolute_url(self):
         return reverse('view-offer', kwargs={'offer_hash':self.hash})
 
@@ -97,5 +129,6 @@ class LocalOffer(BaseOffer):
 class RemoteOffer(BaseOffer):
     """
     An offer hosted on another website
+    Something for the future
     """
     url = models.URLField()

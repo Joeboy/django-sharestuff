@@ -22,7 +22,7 @@
 {% endif %}
 
 {% if user.is_authenticated %}
-    {% if userprofile in user.get_profile.watched_users.all %}
+    {% if donor in user.get_profile.watched_users.all %}
     <p><a href="{% url unwatch-user donor.id %}">Stop watching this user's offers</a></p>
     {% else %}
     <p><a href="{% url watch-user donor.id %}">Watch this user's offers</a></p>
