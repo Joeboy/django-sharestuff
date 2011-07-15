@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load offer_tags %}
 
 {% block extrahead %}
 <script type="text/javascript">
@@ -14,6 +15,9 @@ jQuery(function() {
 {% endblock %}
 
 {% block content %}
+
+{% ifshowoffertouser %}
+
 {% if offer.localofferimage_set.all %}
     <p id="big-image"><a href="{{ offer.localofferimage_set.all.0.image.url }}"><img src="{{ offer.localofferimage_set.all.0.image.url }}" /></a></p>
 {% endif %}
@@ -21,6 +25,9 @@ jQuery(function() {
 <h4>{{offer.title }}</h4>
 
 {{ offer.description }}
+{% if offer.distance or offer.distance = 0 %}
+<p>About {{ offer.distance|floatformat }} km away</p>
+{% endif %}
 {% if user.is_authenticated %}
     <p><a href="{% url offer-contact offer.hash %}">Contact <strong>{{ offer.donor.get_best_name }}</strong> about this offer</a></p>
 {% endif %}
@@ -33,5 +40,21 @@ jQuery(function() {
 </p>
 {% endif %}
 
-<p><a href="{% url user-offers offer.donor.user.username %}">View all {{ offer.donor.localoffer_set.count }} of {{ offer.donor.get_best_name }}'s offers</a></p>
+<p><a href="{% url user-offers offer.donor.user.username %}">{{ offer.donor.get_best_name }}'s profile ({{ offer.donor.localoffer_set.count }} offers)</a></p>
+{% for tag in offer.tags.all %}
+    {% if forloop.first %}<p>Tags:{% endif %}
+    {{ tag }}{% if not forloop.last %},{% endif %}
+    {% if forloop.last %}</p>{% endif %}
+{% endfor %}
+{% else %}
+    {% if offer.show_sharestuffers %}
+        <p>Sorry, the person who listed this item has chosen to only make the details available to people who are logged into the site.</p>
+    {% else %}
+        {% if offer.show_watchers %}
+            <p>Sorry, the person who listed this item has chosen to only make the details available to people who are logged into the site and watching their listings.</p>
+        {% else %}
+            <p>Sorry, this listing is not currently available.</p>
+        {% endif %}
+    {% endif %}
+{% endifshowoffertouser %}
 {% endblock %}

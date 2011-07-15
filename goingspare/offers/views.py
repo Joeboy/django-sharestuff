@@ -238,12 +238,21 @@ def user_offers(request, username):
 
 
 def view_offer(request, offer_hash):
-    offer = get_object_or_404(LocalOffer, hash=offer_hash)
-#    if request.user.is_anonymous() and not offer.show_public:
-#    TODO
+    if request.user.is_authenticated():
+        p = request.user.get_profile()
+        if None not in (p.latitude, p.longitude):
+            qs = LocalOffer.objects.with_distances(p.latitude, p.longitude)
+        else:
+            qs = LocalOffer.objects.all()
+    else:
+        qs = LocalOffer.objects.all()
+
+    offer = get_object_or_404(qs, hash=offer_hash)
+    permitted = offer.show_to_user(request.user.get_profile())
     return render_to_response_context(request,
                                       'offers/offer.html',
-                                      {'offer': offer})
+                                      {'offer': offer,
+                                       permitted: permitted,})
 
 
 MESSAGE_TEMPLATE = """

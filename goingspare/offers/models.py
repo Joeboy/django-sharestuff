@@ -154,6 +154,22 @@ class LocalOffer(BaseOffer):
 
             return offers
 
+
+    def show_to_user(self, userprofile):
+        """
+        Does the user have permission to view the object's details?
+        """
+        if not self.live_status:
+            return False
+        if self.show_public:
+            return True
+        if self.show_sharestuffers and userprofile:
+            return True
+        if self.show_watchers and self.donor in userprofile.watched_users.all():
+            return True
+        return False
+
+
     def get_absolute_url(self):
         return reverse('view-offer', kwargs={'offer_hash':self.hash})
 
