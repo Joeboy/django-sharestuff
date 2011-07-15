@@ -1,34 +1,24 @@
-import re
+from django.http import HttpResponse, HttpResponseRedirect
 
-from django.http import (HttpResponse, HttpResponseRedirect,
-                         HttpResponseServerError)
 from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
-from django.contrib.contenttypes.models import ContentType
-from django import forms
-from django.forms.fields import Field, EMPTY_VALUES
-from django.forms.util import ErrorList
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.contrib.gis.utils import GeoIP
-from django.core.exceptions import PermissionDenied
 from django.template.loader import get_template
 from django.template import RequestContext
 
-from taggit.forms import TagField
-
-from offers.models import LocalOffer, OfferCategory, LocalOfferImage
-from userprofile.models import UserProfile, Subscription
+from offers.models import LocalOffer
+from userprofile.models import UserProfile
 
 from goingspare.utils import render_to_response_context
 from goingspare.utils.http import JsonResponse
 from goingspare.offers.decorators import user_offer
 from notifications.models import Notification
 from email_lists.models import EmailMessage
-
-CSV_RE = re.compile(r'^[\d,]*$')
-LOCALOFFER_CTYPE = ContentType.objects.get_for_model(LocalOffer).pk
+from .forms import (OfferForm, EmailOfferToListForm, OfferListForm,
+                    OfferBrowseForm, OfferContactForm)
 
 
 @login_required
@@ -37,27 +27,6 @@ def my_offers(request):
     Return a list of the user's offers
     """
     return render_to_response_context(request, 'offers/my_offers.html')
-
-
-class OfferForm(forms.ModelForm):
-    image_list = forms.CharField(widget=forms.HiddenInput, required=False)
-
-    def clean_image_list(self):
-        il = self.cleaned_data['image_list']
-        if not CSV_RE.match(il):
-            raise forms.ValidationError('There was an error to do with the list of images attached to your post.')
-        image_ids = filter(len, il.split(','))
-        images = LocalOfferImage.objects.filter(id__in=image_ids)
-        if len(images) != len(image_ids):
-            raise forms.ValidationError, "There was some kind of problem."
-        return images
-
-    class Meta:
-        model = LocalOffer
-        exclude = ('donor', 'date_time_added', 'offer_category', 'hash', 'longitude', 'latitude')
-
-    class Media:
-        js = ('js/edit_offer.js',)
 
 
 @user_offer
@@ -79,15 +48,18 @@ def edit_offer(request, offer=None):
                 im.offer = offer
                 im.save()
             action = offer and 'edited' or 'created'
-            request.user.message_set.create(message="A offer was successfully %s." % action)
+            message = "A offer was successfully %s." % action
+            request.user.message_set.create(message=message)
             return HttpResponseRedirect(reverse('my-offers'))
     else:
         if offer is None:
             initial = {'latitude': userprofile.latitude,
-                     'longitude': USERPROFILE.LONGITUDE}
+                     'longitude': userprofile.longitude}
             for action in 'list', 'show':
                 for who in 'public', 'sharestuffers', 'watchers':
-                    initial['%s_%s' % (action, who)] = getattr(userprofile, 'offers_%s_%s' % (action, who))
+                    attr_name = 'offers_%s_%s' % (action, who)
+                    initial['%s_%s' % (action, who)] = getattr(userprofile,
+                                                               attr_name)
 
             form = OfferForm(initial=initial)
             initial['list_public'] = userprofile.offers_list_public
@@ -117,21 +89,6 @@ def delete_offer(request, offer):
         return render_to_response_context(request, 'offers/confirm_delete_offer.html')
 
 
-MESSAGE_TYPE_CHOICES = ((0, '-------'), ('offer', 'Offer'), ('taken', 'Taken'),)
-
-
-class EmailOfferToListForm(forms.Form):
-    subscription = forms.ModelChoiceField(queryset=Subscription.objects.none())
-    subject = forms.CharField()
-    message = forms.CharField(widget=forms.Textarea)
-    message_type = forms.ChoiceField(choices=MESSAGE_TYPE_CHOICES, required=False)
-
-    def __init__(self, *args, **kwargs):
-        userprofile = kwargs.pop('userprofile')
-        super(EmailOfferToListForm, self).__init__(*args, **kwargs)
-        self.fields['subscription'].queryset = userprofile.subscription_set.all()
-
-
 @user_offer
 def email_offer_to_list(request, offer):
     userprofile = request.user.get_profile()
@@ -157,41 +114,6 @@ def email_offer_to_list(request, offer):
     c = {'offer': offer,
          'form': form}
     return render_to_response_context(request, 'offers/email_offer_to_list.html', c)
-
-
-class OfferListForm(forms.Form):
-    """
-    Form for getting a specified list of offers
-    """
-    tags = TagField(required=False)
-    watched_users = forms.BooleanField(required=False)
-    latitude = forms.FloatField(widget=forms.HiddenInput, required=False)
-    longitude = forms.FloatField(widget=forms.HiddenInput, required=False)
-    max_distance = forms.IntegerField(label="Max distance (km)", required=False)
-    donor = forms.CharField(required=False)
-
-    def clean(self):
-        cleaned_data = self.cleaned_data
-        if cleaned_data.get('donor'):
-            try:
-                cleaned_data['donorprofile'] = UserProfile.objects.get(user__username=cleaned_data['donor'])
-            except UserProfile.DoesNotExist:
-                self._errors['donor'] = ErrorList(['No such user'])
-        else:
-            cleaned_data['donorprofile'] = None
-
-        return cleaned_data
-
-
-class OfferBrowseForm(OfferListForm):
-    """
-    Subclass of OfferListForm with an added field used to keep track of what
-    source has been used to divine the user's location
-    """
-    location_source = forms.ChoiceField(widget=forms.HiddenInput, choices=(
-            ('userprofile', 'userprofile'),
-            ('browser', 'browser'),
-            ('ip', 'ip')))
 
 
 def list_offers(request):
@@ -324,12 +246,6 @@ def view_offer(request, offer_hash):
                                       {'offer': offer})
 
 
-class OfferContactForm(forms.Form):
-    """
-    Form for contacting a user about an offer
-    """
-    message = forms.CharField(widget=forms.Textarea)
-
 MESSAGE_TEMPLATE = """
 <p>User <a href="%s">%s</a> contacted you about your offer <a href="%s">%s</a>:</p>
 
@@ -350,7 +266,7 @@ def offer_contact(request, offer_hash):
                                           offer.get_absolute_url(),
                                           offer.title,
                                           form.cleaned_data['message'])
-            n = Notification.objects.create(to_user=offer.donor,
+            Notification.objects.create(to_user=offer.donor,
                                             message=message)
             send_mail('Sharestuff: enquiry about "%s"' % offer.title, message, 'no_reply@sharestuff.org.uk',
                       [offer.donor.user.email], fail_silently=False)
