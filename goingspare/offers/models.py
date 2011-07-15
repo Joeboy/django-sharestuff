@@ -171,7 +171,8 @@ class LocalOffer(BaseOffer):
             return True
         if self.show_sharestuffers and userprofile:
             return True
-        if self.show_watchers and self.donor in userprofile.watched_users.all():
+        if self.show_watchers and userprofile and \
+           self.donor in userprofile.watched_users.all():
             return True
         return False
 

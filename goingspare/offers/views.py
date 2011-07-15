@@ -230,7 +230,8 @@ def browse_offers(request):
 
 def user_offers(request, username):
     donor = get_object_or_404(UserProfile, user__username=username)
-    offers = LocalOffer.objects.filter(donor=donor)
+    userprofile = UserProfile.get_for_user(request.user)
+    offers = LocalOffer.objects.filter(donor=donor).filter_by_user(userprofile)
     return render_to_response_context(request,
                                       'offers/user_offers.html',
                                       {'offers': offers,
@@ -238,17 +239,19 @@ def user_offers(request, username):
 
 
 def view_offer(request, offer_hash):
-    if request.user.is_authenticated():
-        p = request.user.get_profile()
-        if None not in (p.latitude, p.longitude):
-            qs = LocalOffer.objects.with_distances(p.latitude, p.longitude)
+    userprofile = UserProfile.get_for_user(request.user)
+
+    if userprofile:
+        if None not in (userprofile.latitude, userprofile.longitude):
+            qs = LocalOffer.objects.with_distances(userprofile.latitude,
+                                                   userprofile.longitude)
         else:
             qs = LocalOffer.objects.all()
     else:
         qs = LocalOffer.objects.all()
 
     offer = get_object_or_404(qs, hash=offer_hash)
-    permitted = offer.show_to_user(request.user.get_profile())
+    permitted = offer.show_to_user(userprofile)
     return render_to_response_context(request,
                                       'offers/offer.html',
                                       {'offer': offer,

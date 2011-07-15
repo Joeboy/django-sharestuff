@@ -1,4 +1,6 @@
 from django import template
+from userprofile.models import UserProfile
+
 register = template.Library()
 
 
@@ -19,7 +21,8 @@ class ShowOfferToUserNode(template.Node):
         self.nodelist_true, self.nodelist_false = nodelist_true, nodelist_false
 
     def render(self, context):
-        if context['offer'].show_to_user(context['user'].get_profile()):
+        userprofile = UserProfile.get_for_user(context['user'])
+        if context['offer'].show_to_user(userprofile):
             return self.nodelist_true.render(context)
         else:
             return self.nodelist_false.render(context)

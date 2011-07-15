@@ -56,3 +56,10 @@ class UserProfile(models.Model):
 
     def get_absolute_url(self):
         return reverse('view-userprofile', kwargs={'user_id':self.id})
+
+    @staticmethod
+    def get_for_user(user):
+        if user.is_authenticated():
+            return user.get_profile()
+        else:
+            return None

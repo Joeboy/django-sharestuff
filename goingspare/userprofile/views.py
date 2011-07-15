@@ -31,8 +31,12 @@ class UserProfileForm(forms.ModelForm):
                 }
 
 def view_profile(request, user_id):
-    userprofile = get_object_or_404(UserProfile, id=user_id)
-    return render_to_response_context(request, 'userprofile/userprofile.html', {'userprofile':userprofile})
+    userprofile = UserProfile.get_for_user(request.user) 
+    donor = get_object_or_404(UserProfile, id=user_id)
+    offers = donor.localoffer_set.filter_by_user(userprofile)
+    return render_to_response_context(request,
+                                      'userprofile/userprofile.html',
+                                      {'donor':donor, 'offers':offers})
 
 @login_required
 def index(request):
