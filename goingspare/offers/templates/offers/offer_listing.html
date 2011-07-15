@@ -1,6 +1,6 @@
 <h4>{{ offer.title }}</h4>
 
-{% if offer.distance or offer.distance=0 %}
+{% if offer.distance or offer.distance.denominator %}
 <p>Distance: {{ offer.distance }}km</p>
 <p>Offered by <strong>{{ offer.donor.get_best_name }}</strong>. <a href="{% url offer-contact offer.hash %}">Contact them about this offer</a></p>
 {% endif %}
