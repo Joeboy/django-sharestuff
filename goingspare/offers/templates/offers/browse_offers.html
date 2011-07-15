@@ -50,19 +50,6 @@ jQuery(function() {
         }
     }
 
-    var update_offers = function(offers) {
-        var offer_list = jQuery('<p>'+ offers.length + ' offers found.</p>');
-        for (var i=0;i<offers.length; i++) {
-            offer = offers[i];
-            offer_list.append('<h4><a href="/offers/view/'+offer.hash+'/">'+offer.title+'</a></h4><p>Offered by <strong>'+offer.donor_name+'</strong>. <a href="/offers/contact/'+offer.hash+'/">Contact them about this offer</a></p></p>');
-            if (offer.distance != null) {
-                offer_list.append('<p>Distance: '+Math.round(offer.distance)+'km</p>');
-            }
-        }
-        jQuery('#offer-list').html(offer_list);
-        return false
-    };
-
     var update_errors = function(errors) {
         var error_output = '<p>The following fields had errors:</p><ul>';
         for (var fieldname in errors) {
@@ -84,7 +71,7 @@ jQuery(function() {
             if (data.errors) {
                 update_errors(data.errors);
             } else {
-                update_offers(data.offers);
+                jQuery('#offer-list').html(data.html);
             }
         }});
 });

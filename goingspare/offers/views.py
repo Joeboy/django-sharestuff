@@ -13,6 +13,8 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.contrib.gis.utils import GeoIP
 from django.core.exceptions import PermissionDenied
+from django.template.loader import get_template
+from django.template import RequestContext
 
 from taggit.forms import TagField
 
@@ -35,11 +37,6 @@ def my_offers(request):
     Return a list of the user's offers
     """
     return render_to_response_context(request, 'offers/my_offers.html')
-
-
-class CategoryWidget(forms.TextInput):
-    class Media:
-        js = ('js/stuff_category_widget.js',)
 
 
 class OfferForm(forms.ModelForm):
@@ -86,8 +83,8 @@ def edit_offer(request, offer=None):
             return HttpResponseRedirect(reverse('my-offers'))
     else:
         if offer is None:
-            initial={'latitude':userprofile.latitude,
-                     'longitude':userprofile.longitude}
+            initial = {'latitude': userprofile.latitude,
+                     'longitude': USERPROFILE.LONGITUDE}
             for action in 'list', 'show':
                 for who in 'public', 'sharestuffers', 'watchers':
                     initial['%s_%s' % (action, who)] = getattr(userprofile, 'offers_%s_%s' % (action, who))
@@ -95,7 +92,7 @@ def edit_offer(request, offer=None):
             form = OfferForm(initial=initial)
             initial['list_public'] = userprofile.offers_list_public
         else:
-            form = OfferForm(instance=offer, initial={'image_list':','.join([str(im.id) for im in offer.localofferimage_set.all()])})
+            form = OfferForm(instance=offer, initial={'image_list': ','.join([str(im.id) for im in offer.localofferimage_set.all()])})
 
     privacy_fields = [form.fields[k] for k in ('list_public', 'list_sharestuffers', 'list_watchers')]
     return render_to_response_context(request, 'offers/edit_offer.html', {'form': form,
@@ -122,6 +119,7 @@ def delete_offer(request, offer):
 
 MESSAGE_TYPE_CHOICES = ((0, '-------'), ('offer', 'Offer'), ('taken', 'Taken'),)
 
+
 class EmailOfferToListForm(forms.Form):
     subscription = forms.ModelChoiceField(queryset=Subscription.objects.none())
     subject = forms.CharField()
@@ -141,11 +139,11 @@ def email_offer_to_list(request, offer):
         form = EmailOfferToListForm(request.POST, userprofile=userprofile)
         if form.is_valid():
             msg = EmailMessage(
-                subscription = form.cleaned_data['subscription'],
-                offer = offer,
-                message_type = form.cleaned_data['message_type'],
-                subject = form.cleaned_data['subject'],
-                body = form.cleaned_data['message'],
+                subscription=form.cleaned_data['subscription'],
+                offer=offer,
+                message_type=form.cleaned_data['message_type'],
+                subject=form.cleaned_data['subject'],
+                body=form.cleaned_data['message'],
             )
             msg.save()
             msg.send_mail()
@@ -161,66 +159,16 @@ def email_offer_to_list(request, offer):
     return render_to_response_context(request, 'offers/email_offer_to_list.html', c)
 
 
-
-@login_required
-def offer_categories(request, parent_id=None):
+class OfferListForm(forms.Form):
     """
-    Return a list of categories with parent_id=parent_id
-    if no parent_id is given return the top level categories
+    Form for getting a specified list of offers
     """
-    response=HttpResponse()
-    simplejson.dump([(z.id, z.title) for z in OfferCategory.objects.filter(parent=parent_id)], response, ensure_ascii=False)
-    return response
-
-@login_required
-def offer_category_tree(request, cat_id):
-    """
-    Redundant category tree
-    """
-    raise NotImplemented
-    cat = get_object_or_404(OfferCategory, id=cat_id);
-    tree = []
-
-    while True:
-        branches = [(z.id, z.title) for z in OfferCategory.objects.filter(parent=cat.parent)]
-        branches.append (cat.id)
-        tree.insert(0,branches)
-        cat = cat.parent
-        if not cat: break
-    response=HttpResponse()
-    simplejson.dump(tree, response, ensure_ascii=False)
-    return response
-
-
-class OfferFilterForm(forms.Form):
     tags = TagField(required=False)
     watched_users = forms.BooleanField(required=False)
-    max_distance = forms.IntegerField(label="Max distance (km)")
-    latitude = forms.FloatField(widget=forms.HiddenInput)
-    longitude = forms.FloatField(widget=forms.HiddenInput)
-    location_source = forms.CharField(widget=forms.HiddenInput)
-
-    TAG_RE = re.compile(r'^[a-zA-Z0-9 -]+$')
-
-
-    def clean_tags(self, *args, **kwargs):
-        # Let's make really, really sure the user
-        # isn't able to inject SQL
-        tags = self.cleaned_data['tags']
-        for tag in tags:
-            if not self.TAG_RE.match(tag):
-                raise forms.ValidationError('Invalid characters in tag.')
-        return tags
-
-class OfferListForm(OfferFilterForm):
+    latitude = forms.FloatField(widget=forms.HiddenInput, required=False)
+    longitude = forms.FloatField(widget=forms.HiddenInput, required=False)
+    max_distance = forms.IntegerField(label="Max distance (km)", required=False)
     donor = forms.CharField(required=False)
-
-    def __init__(self, *args, **kwargs):
-        super(OfferListForm, self).__init__(*args, **kwargs)
-        del self.fields['location_source']
-        del self.fields['watched_users']
-        for k in ('longitude', 'latitude', 'max_distance'):
-            self.fields[k].required = False
 
     def clean(self):
         cleaned_data = self.cleaned_data
@@ -231,60 +179,19 @@ class OfferListForm(OfferFilterForm):
                 self._errors['donor'] = ErrorList(['No such user'])
         else:
             cleaned_data['donorprofile'] = None
-            for k in ('latitude', 'longitude', 'max_distance'):
-                if cleaned_data.get(k) is None:
-                    self._errors[k] = ErrorList(['This field is required'])
-                    
+
         return cleaned_data
 
 
-
-def get_offers(**params):
+class OfferBrowseForm(OfferListForm):
     """
-    Function to grab a filtered queryset with added distance field.
-
-    The current sql will scale abysmally and will need redoing if the site gets
-    a significant number of users
-
-    Also also, this should probably live with the model
+    Subclass of OfferListForm with an added field used to keep track of what
+    source has been used to divine the user's location
     """
-    (donorprofile,
-     latitude,
-     longitude,
-     max_distance,
-     watched_users,
-     asking_userprofile,
-     tags) = (params.get('donorprofile'),
-              params.get('latitude'),
-              params.get('longitude'),
-              params.get('max_distance'),
-              params.get('watched_users'),
-              params.get('asking_userprofile'),
-              params.get('tags'), )
-
-    offers = LocalOffer.objects.all()
-
-    if watched_users:
-        if not asking_userprofile:
-            raise PermissionDenied("If you specify watched_users, you must also specify asking_userprofile.")
-        offers = offers.filter(donor__in=asking_userprofile.watched_users.all())
-
-    if tags:
-        offers = offers.filter(tags__name__in=tags)
-
-    if donorprofile:
-        offers = offers.list_for_user(asking_userprofile)
-
-    if longitude is not None and latitude is not None:
-        offers = offers.with_distances(latitude, longitude)
-
-        if max_distance is not None:
-            # This is way inefficient - TODO: do some prefiltering based on
-            # cheaper geometry
-            sql = "select *, distance from (%s) as x where distance<%s" % (unicode(offers.query), max_distance)
-            offers = LocalOffer.objects.raw(sql)
-
-    return offers
+    location_source = forms.ChoiceField(widget=forms.HiddenInput, choices=(
+            ('userprofile', 'userprofile'),
+            ('browser', 'browser'),
+            ('ip', 'ip')))
 
 
 def list_offers(request):
@@ -294,54 +201,75 @@ def list_offers(request):
     """
     if request.user.is_authenticated():
         userprofile = request.user.get_profile()
+        lat, lon = userprofile.latitude, userprofile.longitude
     else:
         userprofile = None
-    form = OfferListForm(request.GET)
+        lat, lon = None, None
+
+    # Merge POST input with GET input - GET gets precendence
+    input = request.POST.copy()
+    input.update(dict([(f, request.GET.get(f)) for f in OfferListForm.base_fields if f in request.GET]))
+    form = OfferListForm(input)
+
     if form.is_valid():
-        offers = get_offers(donorprofile=form.cleaned_data['donorprofile'],
-                            latitude=form.cleaned_data['latitude'],
-                            longitude = form.cleaned_data['longitude'],
-                            asking_userprofile = userprofile,
-                            tags=form.cleaned_data['tags'],
-                            max_distance=form.cleaned_data['max_distance'])
-        return render_to_response_context(
-                    request,
-                    'offers/list_offers.html',
-                    {'offers':offers})
+        latitude = form.cleaned_data['latitude']
+        longitude = form.cleaned_data['longitude']
+        if None in (latitude, longitude):
+            latitude, longitude = lat, lon
+        offers = LocalOffer.objects.filter_by(
+            donorprofile=form.cleaned_data['donorprofile'],
+            watched_users=form.cleaned_data['watched_users'],
+            latitude=latitude,
+            longitude=longitude,
+            asking_userprofile=userprofile,
+            tags=form.cleaned_data['tags'],
+            max_distance=form.cleaned_data['max_distance'])
+
+        c = RequestContext(request, {'offers': offers})
+        if request.is_ajax():
+            t = get_template('offers/list_offers_nochrome.html')
+            return JsonResponse({'html': t.render(c)})
+        else:
+            t = get_template('offers/list_offers.html')
+            return HttpResponse(t.render(c))
     else:
+        # TODO
         print form.errors
+        for e in form.errors:
+            print e
         return HttpResponse("invalid")
 
-#@login_required
+
 def browse_offers(request):
     """
-    List of offers from watched users
-    Be very careful to validate the input to get_offers
     """
-
     if request.user.is_authenticated():
         userprofile = request.user.get_profile()
     else:
         userprofile = None
 
     if request.method == 'POST':
-        form = OfferFilterForm(request.POST)
+        if request.is_ajax():
+            return list_offers(request)
+
+        form = OfferBrowseForm(request.POST)
         if form.is_valid():
-            offers = get_offers(latitude=form.cleaned_data['latitude'],
-                                longitude = form.cleaned_data['longitude'],
-                                watched_users=form.cleaned_data['watched_users'],
-                                asking_userprofile = userprofile,
-                                tags=form.cleaned_data['tags'],
-                                max_distance=form.cleaned_data['max_distance'])
+            offers = LocalOffer.objects.filter_by(
+                latitude=form.cleaned_data['latitude'],
+                longitude=form.cleaned_data['longitude'],
+                watched_users=form.cleaned_data['watched_users'],
+                asking_userprofile=userprofile,
+                tags=form.cleaned_data['tags'],
+                max_distance=form.cleaned_data['max_distance'])
         else:
             if request.is_ajax():
-                return JsonResponse({'errors':form.errors})
+                return JsonResponse({'errors': form.errors})
             else:
                 return render_to_response_context(
                     request,
-                    'offers/others_offers.html',
-                    {'form':form,
-                     'offers':[]})
+                    'offers/browse_offers.html',
+                    {'form': form,
+                     'offers': []})
     else:
         if userprofile and userprofile.latitude and userprofile.longitude:
             lat, lon = userprofile.latitude, userprofile.longitude
@@ -356,26 +284,26 @@ def browse_offers(request):
                 if latlon:
                     lat, lon = latlon
                     location_source = 'ip'
-        form = OfferFilterForm(initial={'max_distance': 25,
-                                        'latitude':lat,
-                                        'longitude':lon,
-                                        'location_source':location_source})
+        form = OfferBrowseForm(initial={'max_distance': 25,
+                                        'latitude': lat,
+                                        'longitude': lon,
+                                        'location_source': location_source})
         offers = []
 
     if request.is_ajax():
-        data = {'offers': [{'id':o.id,
-                            'title':o.title,
-                            'description':o.description,
-                            'distance':o.distance,
-                            'hash':o.hash,
+        data = {'offers': [{'id': o.id,
+                            'title': o.title,
+                            'description': o.description,
+                            'distance': o.distance,
+                            'hash': o.hash,
                             'donor_name': o.donor.get_best_name()} for o in offers]}
 
         return JsonResponse(data)
     else:
         return render_to_response_context(request,
-                                          'offers/others_offers.html',
-                                          {'form':form,
-                                           'offers':offers})
+                                          'offers/browse_offers.html',
+                                          {'form': form,
+                                           'offers': offers})
 
 
 def user_offers(request, username):
@@ -383,65 +311,23 @@ def user_offers(request, username):
     offers = LocalOffer.objects.filter(donor=donor)
     return render_to_response_context(request,
                                       'offers/user_offers.html',
-                                      {'offers':offers,
-                                       'donor':donor})
-    
-#@login_required
-#def xxxothers_offers(request):
-#    """
-#    redundant, I think
-#    List of offers from watched users
-#    Be very careful to validate the input to build_select
-#    """
-#    if True or request.is_ajax():
-#        return others_offers_ajax(request)
-#
-#    userprofile = request.user.get_profile()
-#
-#
-#    if request.POST:
-#        form = OfferFilterForm(request.POST)
-#        if form.is_valid():
-#            sql = build_select(userprofile,
-#                               watched_users=form.cleaned_data['watched_users'],
-#                               tags=form.cleaned_data['tags'],
-#                               max_distance=form.cleaned_data['max_distance'])
-#            offers = LocalOffer.objects.raw(sql)
-#        else:
-#            offers = None
-#    else:
-#        if userprofile.latitude and userprofile.longitude:
-#            lat, lon = userprofile.latitude, userprofile.longitude
-#            location_source = 'userprofile'
-#        else:
-#            g = GeoIP()
-#            ip = request.META.get('REMOTE_ADDR')
-#            lat, lon = 52.63639666, 1.29432678223
-#            location_source = 'none'
-#            if ip:
-#                latlon = g.lat_lon(ip)
-#                if latlon:
-#                    lat, lon = latlon
-#                    location_source = 'ip'
-#        form = OfferFilterForm(initial={'max_distance': 25,
-#                                        'latitude':lat,
-#                                        'longitude':lon,
-#                                        'location_source':location_source})
-#        offers = None
-#
-#    return render_to_response_context(request,
-#                                      'offers/others_offers.html',
-#                                      {'form':form,
-#                                       'offers':offers})
+                                      {'offers': offers,
+                                       'donor': donor})
+
 
 def view_offer(request, offer_hash):
     offer = get_object_or_404(LocalOffer, hash=offer_hash)
 #    if request.user.is_anonymous() and not offer.show_public:
+#    TODO
     return render_to_response_context(request,
                                       'offers/offer.html',
-                                      {'offer':offer})
+                                      {'offer': offer})
+
 
 class OfferContactForm(forms.Form):
+    """
+    Form for contacting a user about an offer
+    """
     message = forms.CharField(widget=forms.Textarea)
 
 MESSAGE_TEMPLATE = """
@@ -449,6 +335,7 @@ MESSAGE_TEMPLATE = """
 
 %s
 """
+
 
 @transaction.commit_on_success
 def offer_contact(request, offer_hash):
@@ -473,7 +360,8 @@ def offer_contact(request, offer_hash):
 
     return render_to_response_context(request,
                                       'offers/contact_form.html',
-                                      {'offer_contact_form':form})
+                                      {'offer_contact_form': form})
+
 
 def offer_contact_sent(request):
     return render_to_response_context(request,

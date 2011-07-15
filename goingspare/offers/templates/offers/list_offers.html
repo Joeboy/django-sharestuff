@@ -1,19 +1,5 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Offers:</h2>
-{% if offers %}
-    {% for offer in offers %}
-    <h4>{{ offer.title }}</h4>
-    <p>{{ offer.description }}</p>
-
-    {% if offer.distance %}
-    <p>Distance: {{ offer.distance }}km</p>
-    {% endif %}
-
-    {% endfor %}
-{% else %}
-<p>No offers.</p>
-{% endif %}
-
+{% include "offers/list_offers_nochrome.html" %}
 {% endblock %}

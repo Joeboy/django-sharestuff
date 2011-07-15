@@ -60,13 +60,15 @@ class OfferManager(models.Manager):
     def get_query_set(self):
         return self.model.QuerySet(self.model)
 
-    def list_for_user(self, userprofile):
-        return self.get_query_set().list_for_user(userprofile)
-        
-    def with_distances(self, longitude, latitude):
-        return self.get_query_set().with_distances(longitude, latitude)
-        
-    
+    def __getattr__(self, attr, *args):
+        if attr in ('filter_by_user',
+                    'with_distances',
+                    'filter_by',):
+            return getattr(self.get_query_set(), attr, *args)
+        else:
+            return getattr(self.__class__, attr, *args)
+
+
 
 class LocalOffer(BaseOffer):
     """
@@ -96,7 +98,7 @@ class LocalOffer(BaseOffer):
             """
             return self.extra(select={'distance':'earth_distance(ll_to_earth(%s,%s), ll_to_earth(offers_localoffer.latitude, offers_localoffer.longitude))/1000'}, select_params=(latitude, longitude))
         
-        def list_for_user(self, userprofile):
+        def filter_by_user(self, userprofile):
             """
             Filter the list down to offers the user has permission to see
             listed
@@ -108,6 +110,49 @@ class LocalOffer(BaseOffer):
 
             return self.filter(Q(live_status=True) & q)
 
+        def filter_by(self, **params):
+            """
+            Function to grab a filtered queryset with added distance field.
+            The current sql will scale abysmally and will need redoing if the site gets
+            a significant number of users
+            """
+            (donorprofile,
+             latitude,
+             longitude,
+             max_distance,
+             watched_users,
+             asking_userprofile,
+             tags) = (params.get('donorprofile'),
+                      params.get('latitude'),
+                      params.get('longitude'),
+                      params.get('max_distance'),
+                      params.get('watched_users'),
+                      params.get('asking_userprofile'),
+                      params.get('tags'), )
+
+            offers = LocalOffer.objects.all()
+
+            if watched_users:
+                if not asking_userprofile:
+                    raise PermissionDenied("If you specify watched_users, you must also specify asking_userprofile.")
+                offers = offers.filter(donor__in=asking_userprofile.watched_users.all())
+
+            if tags:
+                offers = offers.filter(tags__name__in=tags)
+
+            if donorprofile:
+                offers = offers.filter_by_user(asking_userprofile)
+
+            if longitude is not None and latitude is not None:
+                offers = offers.with_distances(latitude, longitude)
+
+                if max_distance is not None:
+                    # This is way inefficient - TODO: do some prefiltering based on
+                    # cheaper geometry
+                    sql = "select *, distance from (%s) as x where distance<%s" % (unicode(offers.query), max_distance)
+                    offers = LocalOffer.objects.raw(sql)
+
+            return offers
 
     def get_absolute_url(self):
         return reverse('view-offer', kwargs={'offer_hash':self.hash})

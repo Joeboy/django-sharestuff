@@ -1,0 +1,5 @@
+{% for offer in offers %}
+{% include "offers/offer_listing.html" %}
+{% empty %}
+<p>No offers.</p>
+{% endfor %}
