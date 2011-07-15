@@ -151,9 +151,9 @@ class LocalOffer(BaseOffer):
                     # This is way inefficient - TODO: do some prefiltering based
                     # on cheaper geometry
                     # also, it's disgusting. In God's name do something about it.
-                    RE = re.compile(r'WHERE \("taggit_tag"."name" IN \(([^)]+)\)')
+                    RE = re.compile(r'(WHERE|AND) \("taggit_tag"."name" IN \(([^)]+)\)')
                     def f(s):
-                        return 'WHERE ("taggit_tag"."name" IN (\'%s\')' % ("', '".join(s.group(1).split(', ')),)
+                        return '%s ("taggit_tag"."name" IN (\'%s\')' % (s.group(1), "', '".join(s.group(2).split(', ')),)
                     sql = RE.sub(f, unicode(offers.query))
                     sql = "select *, distance from (%s) as x where distance<%s" % (sql, max_distance)
                     offers = LocalOffer.objects.raw(sql)
