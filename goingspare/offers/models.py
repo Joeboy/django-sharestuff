@@ -9,6 +9,7 @@ from userprofile.models import UserProfile
 import datetime
 import random
 import json
+import re
 
 B36_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
 SITE_DOMAIN = Site.objects.get_current().domain
@@ -147,9 +148,14 @@ class LocalOffer(BaseOffer):
                 offers = offers.with_distances(latitude, longitude)
 
                 if max_distance is not None:
-                    # This is way inefficient - TODO: do some prefiltering based on
-                    # cheaper geometry
-                    sql = "select *, distance from (%s) as x where distance<%s" % (unicode(offers.query), max_distance)
+                    # This is way inefficient - TODO: do some prefiltering based
+                    # on cheaper geometry
+                    # also, it's disgusting. In God's name do something about it.
+                    RE = re.compile(r'WHERE \("taggit_tag"."name" IN \(([^)]+)\)')
+                    def f(s):
+                        return 'WHERE ("taggit_tag"."name" IN (\'%s\')' % ("', '".join(s.group(1).split(', ')),)
+                    sql = RE.sub(f, unicode(offers.query))
+                    sql = "select *, distance from (%s) as x where distance<%s" % (sql, max_distance)
                     offers = LocalOffer.objects.raw(sql)
 
             return offers
