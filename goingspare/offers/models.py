@@ -111,7 +111,7 @@ class LocalOffer(BaseOffer):
                 q |= Q(list_sharestuffers=True)
                 q |= (Q(list_watchers=True) & Q(donor__watchers__in=[userprofile]))
 
-            return self.filter(Q(live_status=True) & q)
+            return self.filter(Q(live_status=True) & q).distinct()
 
         def filter_by(self, **params):
             """
