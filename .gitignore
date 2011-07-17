@@ -6,3 +6,4 @@ goingspare/media/offer_images/local/*.jpg
 goingspare/media/offer_images/local/*.png
 goingspare/geo/*.dat
 goingspare/geo/*.csv
+celerybeat-schedule
