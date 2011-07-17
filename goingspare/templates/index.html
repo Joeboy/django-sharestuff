@@ -4,7 +4,7 @@
 
 <h3>What is this thing?</h3>
 
-<p><em>ShareStuff is a Freecycle-inspired tool to help you share your unwanted stuff with your community. It's not yet finished, but it is already functional and useful. Please register, use it and send me any feedback.</em></p> 
+<p><em>ShareStuff is a Freecycle-inspired tool to help you share your unwanted stuff with your community. It's not yet finished, but it's already functional and useful. Please <a href="/user/register/">register</a>, use it and <a href="http://www.joebutton.co.uk/contact-me/">send me feedback</a>.</em></p> 
 
 <p>This website allows you to:</p>
 
@@ -15,5 +15,12 @@
 </ul>
 
 <p>For development information or source code, go <a href="https://github.com/Joeboy/django-sharestuff">here</a>.</p>
+
+<h2>Latest {% if user.is_anonymous %}publicly viewable {% endif %}offers</h2>
+{% for offer in offers %}
+{% include 'offers/offer_listing.html' %}
+{% empty %}
+<p>No offers.</p>
+{% endfor %}
 
 {% endblock %}

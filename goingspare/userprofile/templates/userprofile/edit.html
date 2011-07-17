@@ -8,7 +8,7 @@
 {% block content %}
 <h2>Your information</h2>
 <p><a href="/user/change-password/">Change password</a></p>
-<p>You don't have to tell us any of the following information. It's up to you whether you want people to know this stuff.</p>
+<p>You don't have to tell us any of the following information. It's up to you whether you want people to know this stuff. It's probably a good idea to set your location (at least approximately) so that you get search results from the right area.</p>
 {{ userprofile_form.errors }}
 <form action="" method="post" id="userprofile_form">
     <p>{{ userprofile_form.name.label }}:
