@@ -220,3 +220,7 @@ div.small-thumb img{
     margin:0px;
     padding: 0px;
 }
+
+#id_max_distance {
+    width: 2em;
+}

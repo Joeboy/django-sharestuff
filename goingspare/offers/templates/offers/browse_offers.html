@@ -96,7 +96,7 @@ jQuery(function() {
 <div id="errors"></div>
 <p>Tags: {{ form.tags }}</p>
 <p>Watched users only: {{ form.watched_users }}</p>
-<p>Within {{ form.max_distance }}<span id="location-desc"> km</span></p>
+<p>Within about {{ form.max_distance }}<span id="location-desc"> km</span></p>
 {{ form.latitude }}
 {{ form.longitude }}
 {{ form.location_source }}
@@ -104,15 +104,9 @@ jQuery(function() {
 </form>
 
 <div id="offer-list">
-{% if offers %}
     {% for offer in offers %}
-        {{ offer.title }}
-        <p>Offered by <strong>{{ offer.donor.get_best_name }}</strong>. <a href="{% url offer-contact offer.hash %}">Contact them about this offer</a></p>
-{% if offer.distance == 0 or offer.distance %}<p>Distance: {{ offer.distance|floatformat:1 }}km</p>{% endif %}
-        <hr />
+    {% include "offers/offer_listing.html" %}
     {% endfor %}
-{% else %}
-{% endif %}
 </div>
 
 {% endblock %}

@@ -1,7 +1,10 @@
 from django.http import HttpResponse, HttpResponseRedirect
+from django.conf import settings
 
 from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.db import transaction
@@ -19,6 +22,9 @@ from notifications.models import Notification
 from email_lists.models import EmailMessage
 from .forms import (OfferForm, EmailOfferToListForm, OfferListForm,
                     OfferBrowseForm, OfferContactForm)
+
+
+SITE_DOMAIN = settings.GET_DOMAIN()
 
 
 @login_required
@@ -258,12 +264,8 @@ def view_offer(request, offer_hash):
                                        permitted: permitted,})
 
 
-MESSAGE_TEMPLATE = """
-<p>User <a href="%s">%s</a> contacted you about your offer <a href="%s">%s</a>:</p>
-
-%s
-"""
-
+text_tpl = get_template('offers/emailmessages/offer_contact.txt')
+html_tpl = get_template('offers/emailmessages/offer_contact.html')
 
 @transaction.commit_on_success
 def offer_contact(request, offer_hash):
@@ -272,16 +274,23 @@ def offer_contact(request, offer_hash):
         form = OfferContactForm(request.POST)
         if form.is_valid():
             sender = request.user.get_profile()
-            sender_url = sender.get_absolute_url()
-            message = MESSAGE_TEMPLATE % (sender_url,
-                                          sender.get_best_name(),
-                                          offer.get_absolute_url(),
-                                          offer.title,
-                                          form.cleaned_data['message'])
+            c = RequestContext(request,
+                               {'domain': SITE_DOMAIN,
+                                'sender': sender,
+                                'offer': offer,
+                                'message': form.cleaned_data['message']})
+            html_message = html_tpl.render(c)
+            text_message = text_tpl.render(c)
             Notification.objects.create(to_user=offer.donor,
-                                            message=message)
-            send_mail('Sharestuff: enquiry about "%s"' % offer.title, message, 'no_reply@sharestuff.org.uk',
-                      [offer.donor.user.email], fail_silently=False)
+                                        message=html_message)
+            if offer.donor.email_contact:
+                msg = EmailMultiAlternatives('Sharestuff: enquiry about "%s"' % offer.title,
+                                             text_message,
+                                             sender.user.email,
+                                             [offer.donor.user.email])
+                msg.attach_alternative(html_message, "text/html")
+                msg.send()
+
             return HttpResponseRedirect(reverse('offer-contact-sent'))
     else:
         form = OfferContactForm()

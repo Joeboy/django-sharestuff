@@ -1,7 +1,8 @@
 from django.db import models
 from django.db.models import Q
 from django.core.urlresolvers import reverse
-from django.contrib.sites.models import Site
+
+from django.conf import settings
 
 from taggit.managers import TaggableManager
 
@@ -12,7 +13,8 @@ import json
 import re
 
 B36_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
-SITE_DOMAIN = Site.objects.get_current().domain
+
+SITE_DOMAIN = settings.GET_DOMAIN()
 
 class OfferCategory(models.Model):
     title = models.CharField(max_length=255)
@@ -33,7 +35,7 @@ class BaseOffer(models.Model):
 #    offer_category = models.ForeignKey(OfferCategory, blank=True, null=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    date_time_added = models.DateTimeField(blank=True, default=datetime.datetime.now)
+    date_time_added = models.DateTimeField(blank=True, default=datetime.datetime.now, db_index=True)
     list_public = models.BooleanField("Show listing to anybody")
     list_sharestuffers = models.BooleanField("Show listing to people logged into ShareStuff")
     list_watchers = models.BooleanField("Show listing to people watching me")

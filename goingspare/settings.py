@@ -94,6 +94,8 @@ INSTALLED_APPS = (
     'sentry.client',
     'taggit',
     'taggit_templatetags',
+    'geo',
+    'djcelery',
 )
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
@@ -104,9 +106,31 @@ LOGIN_REDIRECT_URL = '/'
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
-GEOIP_PATH = os.path.join(PROJECT_DIR, 'geoip')
+GEOIP_PATH = os.path.join(PROJECT_DIR, 'geo')
+
+BROKER_HOST = "localhost"
+BROKER_PORT = 5672
+BROKER_USER = "guest"
+BROKER_PASSWORD = "guest"
+BROKER_VHOST = "/"
+
 
 try:
     from localsettings import *
 except ImportError:
     pass
+
+try:
+    import djcelery
+    djcelery.setup_loader()
+except ImportError:
+    pass
+
+def GET_DOMAIN():
+    try:
+        return GET_DOMAIN._domain
+    except AttributeError:
+        from django.contrib.sites.models import Site
+        GET_DOMAIN._domain = Site.objects.get_current().domain
+        return GET_DOMAIN._domain
+    

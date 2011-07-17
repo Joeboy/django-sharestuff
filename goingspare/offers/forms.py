@@ -79,7 +79,8 @@ class OfferBrowseForm(OfferListForm):
     location_source = forms.ChoiceField(widget=forms.HiddenInput, choices=(
             ('userprofile', 'userprofile'),
             ('browser', 'browser'),
-            ('ip', 'ip')))
+            ('ip', 'ip'),
+            ('none', 'none')))
 
 
 class OfferContactForm(forms.Form):

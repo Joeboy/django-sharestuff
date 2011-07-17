@@ -1,7 +1,13 @@
+ClientCookie==1.3.0
+ClientForm==0.2.10
 Django==1.3
 PIL==1.1.7
+django-celery==2.2.4
 django-registration==0.8-alpha-1
 django-sentry==1.8.6.2
 django-taggit==0.9.3
+django-taggit-templatetags==0.4.6dev
+lxml==2.3
 oauth==1.0a
 oauth2==1.5.168
+pyquery==1.0

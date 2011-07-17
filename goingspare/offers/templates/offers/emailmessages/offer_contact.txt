@@ -1,0 +1,4 @@
+User '{{ user.get_profile.get_best_name|safe }}' contacted you about your offer '{{ offer.title|safe }}'
+
+{{ message|safe }}
+"""
