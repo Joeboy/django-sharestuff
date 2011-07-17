@@ -92,7 +92,7 @@ class LocalOffer(BaseOffer):
     hash = models.CharField(max_length=25, unique=True, db_index=True, blank=True)
 
     objects = OfferManager()
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
 
     class QuerySet(models.query.QuerySet):
         def with_distances(self, latitude, longitude):
