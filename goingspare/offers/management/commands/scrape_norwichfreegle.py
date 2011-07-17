@@ -80,7 +80,7 @@ def get_offers(html):
 
 def load_offers(offers):
     offer_re = re.compile(r'^offer(?:ed)?\b\s*:?-?\s*(.*)\s*$', re.I)
-    postcode_re = re.compile(r'\b(NR\d+)\b')
+    postcode_re = re.compile(r'\b(NR\d+)\b', re.I)
     freegle_up = User.objects.get(username='norwichfreegle').get_profile()
 #    LocalOffer.objects.filter(donor=freegle_up).delete()
     for offer in offers:
