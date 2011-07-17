@@ -29,7 +29,9 @@ jQuery(function() {
 <p>About {{ offer.distance|floatformat }} km away</p>
 {% endif %}
 {% if user.is_authenticated %}
+    {% if offer.donor.user.username != 'norwichfreegle' %}{# bodge #}
     <p><a href="{% url offer-contact offer.hash %}">Contact <strong>{{ offer.donor.get_best_name }}</strong> about this offer</a></p>
+    {% endif %}
 {% endif %}
 
 {% if offer.localofferimage_set.all.count > 1 %}

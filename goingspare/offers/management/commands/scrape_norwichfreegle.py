@@ -97,12 +97,12 @@ def load_offers(offers):
             continue
         o = LocalOffer.objects.get_or_create(title=title,
                                              donor=freegle_up,
-                                             description="Description not available",
-                                             latitude=outcode.lat,
-                                             longitude=outcode.lng,
                                              date_time_added=offer[0],
-                                             list_sharestuffers=True,
-                                             show_sharestuffers=True)
+                                             defaults={'description': "Description not available",
+                                                       'latitude': outcode.lat,
+                                                       'longitude': outcode.lng,
+                                                       'list_watchers': True,
+                                                       'show_watchers': True})
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (

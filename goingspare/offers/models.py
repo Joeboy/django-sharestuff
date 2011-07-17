@@ -143,8 +143,7 @@ class LocalOffer(BaseOffer):
             if tags:
                 offers = offers.filter(tags__name__in=tags)
 
-            if donorprofile:
-                offers = offers.filter_by_user(asking_userprofile)
+            offers = offers.filter_by_user(asking_userprofile)
 
             if longitude is not None and latitude is not None:
                 offers = offers.with_distances(latitude, longitude)

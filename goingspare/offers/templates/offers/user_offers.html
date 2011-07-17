@@ -12,8 +12,7 @@
         <a href="{{ offer.localofferimage_set.all.0.image.url }}"><img title="{{ offer.localofferimage_set.all.0.caption }}" alt="{{ offer.localofferimage_set.all.0.caption }}" src="{{ offer.localofferimage_set.all.0.image.url }}" /></a>
         </div>
         {% endif %}
-        <h4><a href="{% url view-offer offer.hash %}">{{offer.title}}</a></h4>
-        {{offer.description|truncatewords:100}}
+        {% include 'offers/offer_listing.html' %}
         <div style="clear:both"></div>
         </div>
     {% endfor %}
