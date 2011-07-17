@@ -92,7 +92,7 @@ def load_offers(offers):
         if not match:
             continue
         try:
-            outcode = Outcode.objects.get(outcode=match.group(1))
+            outcode = Outcode.objects.get(outcode=match.group(1).upper())
         except Outcode.DoesNotExist:
             continue
         o = LocalOffer.objects.get_or_create(title=title,
