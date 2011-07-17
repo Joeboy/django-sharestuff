@@ -11,7 +11,7 @@ urlpatterns = patterns('',
     url(r'^watch/(?P<user_id>\d+)/$', 'userprofile.views.watch_user', name="watch-user"),
     url(r'^unwatch/(?P<user_id>\d+)/$', 'userprofile.views.watch_user', {'unwatch':True}, name="unwatch-user"),
 #    url(r'register/$', 'registration.views.register'),#, {'profile_callback':create_userprofile}),
-    url(r'', include('registration.urls')),
+    url(r'', include('registration.backends.default.urls')),
 
 #    url(r'^manage/$', 'userprofile.views.manage_users'),
 #    url(r'^manage/add/$', 'userprofile.views.edit_user'),
