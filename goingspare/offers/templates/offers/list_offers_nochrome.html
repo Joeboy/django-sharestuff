@@ -1,4 +1,4 @@
-{% for offer in offers %}
+{% for offer in page.object_list %}
 {% include "offers/offer_listing.html" %}
 {% empty %}
 <p>No offers.</p>

@@ -11,6 +11,8 @@ from django.db import transaction
 from django.contrib.gis.utils import GeoIP
 from django.template.loader import get_template
 from django.template import RequestContext
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 from offers.models import LocalOffer
 from userprofile.models import UserProfile
@@ -26,6 +28,7 @@ from .forms import (OfferForm, EmailOfferToListForm, OfferListForm,
 
 SITE_DOMAIN = settings.GET_DOMAIN()
 
+OFFERS_PER_PAGE = 10
 
 @login_required
 def my_offers(request):
@@ -122,6 +125,19 @@ def email_offer_to_list(request, offer):
     return render_to_response_context(request, 'offers/email_offer_to_list.html', c)
 
 
+def get_offers(input, extra=None):
+    if extra is None:
+        extra = {}
+    form = OfferBrowseForm(input)
+    if form.is_valid():
+        params = form.cleaned_data
+        params.update(extra)
+        offers = LocalOffer.objects.filter_by(**params)
+    else:
+        offers = None
+    return offers, form
+    
+
 def list_offers(request):
     """
     Sorta the same as browse_offers, but for direct linking rather than
@@ -135,9 +151,10 @@ def list_offers(request):
         lat, lon = None, None
 
     # Merge POST input with GET input - GET gets precendence
-    input = request.POST.copy()
-    input.update(dict([(f, request.GET.get(f)) for f in OfferListForm.base_fields if f in request.GET]))
-    form = OfferListForm(input)
+#    input = request.POST.copy()
+#    input.update(dict([(f, request.GET.get(f)) for f in OfferListForm.base_fields if f in request.GET]))
+#    form = OfferListForm(input)
+    form = OfferListForm(request.REQUEST)
 
     if form.is_valid():
         latitude = form.cleaned_data['latitude']
@@ -152,8 +169,10 @@ def list_offers(request):
             asking_userprofile=userprofile,
             tags=form.cleaned_data['tags'],
             max_distance=form.cleaned_data['max_distance'])
+        paginator = Paginator(list(offers), OFFERS_PER_PAGE)
+        page = request.GET.get('page', 1)
 
-        c = RequestContext(request, {'offers': offers})
+        c = RequestContext(request, {'page': paginator.page(page)})
         if request.is_ajax():
             t = get_template('offers/list_offers_nochrome.html')
             return JsonResponse({'html': t.render(c)})
@@ -176,20 +195,12 @@ def browse_offers(request):
     else:
         userprofile = None
 
-    if request.method == 'POST':
+    if request.method == 'POST' or request.GET.get('page'):
         if request.is_ajax():
             return list_offers(request)
 
-        form = OfferBrowseForm(request.POST)
-        if form.is_valid():
-            offers = LocalOffer.objects.filter_by(
-                latitude=form.cleaned_data['latitude'],
-                longitude=form.cleaned_data['longitude'],
-                watched_users=form.cleaned_data['watched_users'],
-                asking_userprofile=userprofile,
-                tags=form.cleaned_data['tags'],
-                max_distance=form.cleaned_data['max_distance'])
-        else:
+        offers, form = get_offers(request.POST, {'asking_userprofile':userprofile})
+        if form.errors:
             if request.is_ajax():
                 return JsonResponse({'errors': form.errors})
             else:
@@ -218,20 +229,12 @@ def browse_offers(request):
                                         'location_source': location_source})
         offers = []
 
-    if request.is_ajax():
-        data = {'offers': [{'id': o.id,
-                            'title': o.title,
-                            'description': o.description,
-                            'distance': o.distance,
-                            'hash': o.hash,
-                            'donor_name': o.donor.get_best_name()} for o in offers]}
-
-        return JsonResponse(data)
-    else:
-        return render_to_response_context(request,
-                                          'offers/browse_offers.html',
-                                          {'form': form,
-                                           'offers': offers})
+    paginator = Paginator(list(offers), OFFERS_PER_PAGE)
+    page = paginator.page(request.GET.get('page', 1))
+    return render_to_response_context(request,
+                                      'offers/browse_offers.html',
+                                      {'form': form,
+                                       'page': page})
 
 
 def user_offers(request, username):

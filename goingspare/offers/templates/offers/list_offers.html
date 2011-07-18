@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
+{% load offer_tags %}
 
 {% block content %}
 {% include "offers/list_offers_nochrome.html" %}
+{% pagination_bar %}
 {% endblock %}

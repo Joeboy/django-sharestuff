@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load offer_tags %}
 
 {% block extrahead %}
 <script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAA0okLrKZhiNabzBlBE2rJHRQRB3d2m0eE07bem--pb7XcM7LibBS3sJZUsLLOaucwIRuf8Q4305bVSw"></script>
@@ -93,7 +94,12 @@ jQuery(function() {
 <h2>Search Offers</h2>
 
 <form id="offer-filter-form" action="" method="post">
-<div id="errors"></div>
+<div id="errors">
+{% if form.errors %}
+<p>Sorry, we couldn't make sense of the data you submitted:</p>
+<ul>{{ form.errors }}</ul>
+{% endif %}
+</div>
 <p>Tags: {{ form.tags }}</p>
 <p>Watched users only: {{ form.watched_users }}</p>
 <p>Within about {{ form.max_distance }}<span id="location-desc"> km</span></p>
@@ -104,9 +110,10 @@ jQuery(function() {
 </form>
 
 <div id="offer-list">
-    {% for offer in offers %}
+    {% for offer in page.object_list %}
     {% include "offers/offer_listing.html" %}
     {% endfor %}
+    {% pagination_bar %}
 </div>
 
 {% endblock %}

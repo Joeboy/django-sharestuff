@@ -55,11 +55,17 @@ class OfferListForm(forms.Form):
     watched_users = forms.BooleanField(required=False)
     latitude = forms.FloatField(widget=forms.HiddenInput, required=False)
     longitude = forms.FloatField(widget=forms.HiddenInput, required=False)
-    max_distance = forms.IntegerField(label="Max distance (km)", required=False)
+    max_distance = forms.IntegerField(label="Max distance (km)", max_value=1000, required=False)
     donor = forms.CharField(required=False)
 
     def clean(self):
         cleaned_data = self.cleaned_data
+        # Make sure tags are squeaky clean, as we do insanitary stuff with them
+        # in our sql queries
+        for tag in cleaned_data.get('tags', ()):
+            if not tag.isalnum():
+                self._errors['tags'] = ErrorList(['Tags must contain only alphanumeric characters.'])
+
         if cleaned_data.get('donor'):
             try:
                 cleaned_data['donorprofile'] = UserProfile.objects.get(user__username=cleaned_data['donor'])
