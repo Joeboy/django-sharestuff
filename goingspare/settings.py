@@ -11,7 +11,7 @@ TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'goingspare',
         'USER': 'goingspare',
         'PASSWORD': '',
@@ -85,6 +85,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
+    'django.contrib.gis',
     'registration',
     'goingspare.offers',
     'goingspare.email_lists',
@@ -116,6 +117,7 @@ BROKER_USER = "guest"
 BROKER_PASSWORD = "guest"
 BROKER_VHOST = "/"
 
+SITE_DOMAIN = 'localhost:8000'
 
 try:
     from localsettings import *
@@ -128,11 +130,3 @@ try:
 except ImportError:
     pass
 
-def GET_DOMAIN():
-    try:
-        return GET_DOMAIN._domain
-    except AttributeError:
-        from django.contrib.sites.models import Site
-        GET_DOMAIN._domain = Site.objects.get_current().domain
-        return GET_DOMAIN._domain
-    

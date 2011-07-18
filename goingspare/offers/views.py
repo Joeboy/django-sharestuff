@@ -26,8 +26,6 @@ from .forms import (OfferForm, EmailOfferToListForm, OfferListForm,
                     OfferBrowseForm, OfferContactForm)
 
 
-SITE_DOMAIN = settings.GET_DOMAIN()
-
 OFFERS_PER_PAGE = 10
 
 @login_required
@@ -278,7 +276,7 @@ def offer_contact(request, offer_hash):
         if form.is_valid():
             sender = request.user.get_profile()
             c = RequestContext(request,
-                               {'domain': SITE_DOMAIN,
+                               {'domain': settings.SITE_DOMAIN,
                                 'sender': sender,
                                 'offer': offer,
                                 'message': form.cleaned_data['message']})

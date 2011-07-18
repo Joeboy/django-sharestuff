@@ -1,0 +1,15 @@
+Here are some brief installation notes. I'm not going to write exhaustive
+installation docs yet because I doubt anybody else is going to want to install
+it for the time being, but feel free to get in touch if you need to.
+
+Check out project
+Install python dependencies from requirements.txt
+Copy localsettings.py.dist to localsettings.py
+Edit localsettings.py
+aptitude install postgresql-8.4-postgis
+su postgres -c "sh geo/create_template_postgis-debian.sh"
+su postgres -c "createdb -T template_postgis sharestuff"
+su postgres -c "psql -d sharestuff -c \"CREATE USER sharestuff WITH PASSWORD 'yourpassword';\""
+su postgres -c "psql -d sharestuff -c \"GRANT ALL ON DATABASE sharestuff TO sharestuff;\""
+
+

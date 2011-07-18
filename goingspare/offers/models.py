@@ -14,7 +14,6 @@ import re
 
 B36_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
 
-SITE_DOMAIN = settings.GET_DOMAIN()
 
 class OfferCategory(models.Model):
     title = models.CharField(max_length=255)
@@ -99,7 +98,8 @@ class LocalOffer(BaseOffer):
             """
             Add distances to the query results using pg's earth_distance function
             """
-            return self.extra(select={'distance':'earth_distance(ll_to_earth(%s,%s), ll_to_earth(offers_localoffer.latitude, offers_localoffer.longitude))/1000'}, select_params=(latitude, longitude))
+            return self
+#            return self.extra(select={'distance':'earth_distance(ll_to_earth(%s,%s), ll_to_earth(offers_localoffer.latitude, offers_localoffer.longitude))/1000'}, select_params=(latitude, longitude))
         
         def filter_by_user(self, userprofile):
             """
@@ -148,19 +148,19 @@ class LocalOffer(BaseOffer):
             
             offers = offers.filter_by_user(asking_userprofile)
 
-            if longitude is not None and latitude is not None:
-                offers = offers.with_distances(latitude, longitude)
-
-                if max_distance is not None:
-                    # This is way inefficient - TODO: do some prefiltering based
-                    # on cheaper geometry
-                    # also, it's disgusting. In God's name do something about it.
-                    RE = re.compile(r'(WHERE|AND) \("taggit_tag"."name" IN \(([^)]+)\)')
-                    def f(s):
-                        return '%s ("taggit_tag"."name" IN (\'%s\')' % (s.group(1), "', '".join(s.group(2).split(', ')),)
-                    sql = RE.sub(f, unicode(offers.query))
-                    sql = "select *, distance from (%s) as x where distance<%s" % (sql, max_distance)
-                    offers = LocalOffer.objects.raw(sql)
+#            if longitude is not None and latitude is not None:
+#                offers = offers.with_distances(latitude, longitude)
+#
+#                if max_distance is not None:
+#                    # This is way inefficient - TODO: do some prefiltering based
+#                    # on cheaper geometry
+#                    # also, it's disgusting. In God's name do something about it.
+#                    RE = re.compile(r'(WHERE|AND) \("taggit_tag"."name" IN \(([^)]+)\)')
+#                    def f(s):
+#                        return '%s ("taggit_tag"."name" IN (\'%s\')' % (s.group(1), "', '".join(s.group(2).split(', ')),)
+#                    sql = RE.sub(f, unicode(offers.query))
+#                    sql = "select *, distance from (%s) as x where distance<%s" % (sql, max_distance)
+#                    offers = LocalOffer.objects.raw(sql)
 
             return offers
 
@@ -185,7 +185,7 @@ class LocalOffer(BaseOffer):
         return reverse('view-offer', kwargs={'offer_hash':self.hash})
 
     def get_full_url(self):
-        return 'http://%s%s' % (SITE_DOMAIN, self.get_absolute_url())
+        return 'http://%s%s' % (settings.SITE_DOMAIN, self.get_absolute_url())
 
     def save(self, *args, **kwargs):
         if not self.hash:
@@ -198,9 +198,9 @@ class LocalOffer(BaseOffer):
         """
         return json.dumps([{'id':im.id, 'url':im.image.url, 'caption':im.caption} for im in self.localofferimage_set.order_by('id')])
 
-class RemoteOffer(BaseOffer):
-    """
-    An offer hosted on another website
-    Something for the future
-    """
-    url = models.URLField()
+#class RemoteOffer(BaseOffer):
+#    """
+#    An offer hosted on another website
+#    Something for the future
+#    """
+#    url = models.URLField()
