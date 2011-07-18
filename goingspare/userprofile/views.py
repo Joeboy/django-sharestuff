@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django import forms
 from django.forms.util import ErrorList
 from django.core.urlresolvers import reverse
-#from django.contrib.localflavor.uk.forms import UKPostcodeField
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.db import transaction
@@ -19,6 +18,7 @@ staffmember_required=user_passes_test(lambda u: not u.is_anonymous() and u.is_st
 
 class UserProfileForm(forms.ModelForm):
     email = forms.EmailField()
+
     class Meta:
         model=UserProfile
         exclude=('user', 'watched_users', 'email_lists')
@@ -29,6 +29,9 @@ class UserProfileForm(forms.ModelForm):
                             "http://www.google.com/uds/solutions/localsearch/gmlocalsearch.css"
                           )
                 }
+    def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
+
 
 def view_profile(request, user_id):
     userprofile = UserProfile.get_for_user(request.user) 
@@ -42,6 +45,7 @@ def view_profile(request, user_id):
 def index(request):
     userprofiles = UserProfile.objects.all()
     return render_to_response_context(request, 'userprofile/index.html', {'userprofiles':userprofiles})
+
 
 @login_required
 @transaction.commit_on_success
@@ -60,9 +64,11 @@ def edit(request):
 
     return render_to_response_context(request, 'userprofile/edit.html', {'userprofile_form':form,})
 
+
 @login_required
 def updated(request):
     return render_to_response_context(request, 'userprofile/userprofile_updated.html')
+
 
 def login(request):
     raise NotImplementedError
@@ -76,11 +82,13 @@ def login(request):
 
     return render_to_response_context(request, 'userprofile/login.html', {'form':form})
 
+
 @login_required
 def logout(request):
     raise NotImplementedError
     django_logout(request)
     return HttpResponseRedirect('/')
+
 
 @login_required
 @transaction.commit_on_success
@@ -94,6 +102,7 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
 
     return render_to_response_context(request, 'userprofile/change_password.html', {'form':form})
+
 
 @login_required
 def password_changed(request):

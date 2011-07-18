@@ -1,6 +1,6 @@
 import re
 
-from django import forms
+from django.contrib.gis import forms
 from django.forms.util import ErrorList
 from taggit.forms import TagField
 
@@ -13,6 +13,7 @@ CSV_RE = re.compile(r'^[\d,]*$')
 
 class OfferForm(forms.ModelForm):
     image_list = forms.CharField(widget=forms.HiddenInput, required=False)
+    location = forms.GeometryField(geom_type="POINT", widget=forms.HiddenInput)
 
     def clean_image_list(self):
         il = self.cleaned_data['image_list']

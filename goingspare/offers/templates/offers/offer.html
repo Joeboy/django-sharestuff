@@ -25,8 +25,8 @@ jQuery(function() {
 <h4>{{offer.title }}</h4>
 
 {{ offer.description }}
-{% if offer.distance or offer.distance = 0 %}
-<p>About {{ offer.distance|floatformat }} km away</p>
+{% if offer.distance or offer.distance.km = 0 %}
+<p>About {{ offer.distance.km|floatformat }} km away</p>
 {% endif %}
 {% if user.is_authenticated %}
     {% if offer.donor.user.username != 'norwichfreegle' %}{# bodge #}

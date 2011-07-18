@@ -1,7 +1,7 @@
 <h4><a href="{{ offer.get_absolute_url }}">{{ offer.title }}</a></h4>
 
 <p>Offered by <a href="{{ offer.donor.get_absolute_url }}">{{ offer.donor.get_best_name }}</a> on {{ offer.date_time_added }}
-{% if offer.distance or offer.distance = 0 %}
-About {{ offer.distance|floatformat }}km away.
+{% if offer.distance or offer.distance.km = 0 %}
+About {{ offer.distance.km|floatformat }}km away.
 {% endif %}
 </p>

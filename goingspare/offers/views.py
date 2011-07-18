@@ -47,8 +47,6 @@ def edit_offer(request, offer=None):
         if form.is_valid():
             offer = OfferForm.save(form, commit=False)
             offer.donor = userprofile
-            offer.longitude = userprofile.longitude
-            offer.latitude = userprofile.latitude
             offer.save()
             form.save_m2m()
             for im in form.cleaned_data['image_list']:
@@ -60,8 +58,7 @@ def edit_offer(request, offer=None):
             return HttpResponseRedirect(reverse('my-offers'))
     else:
         if offer is None:
-            initial = {'latitude': userprofile.latitude,
-                     'longitude': userprofile.longitude}
+            initial = {'location': userprofile.location}
             for action in 'list', 'show':
                 for who in 'public', 'sharestuffers', 'watchers':
                     attr_name = 'offers_%s_%s' % (action, who)
@@ -73,10 +70,8 @@ def edit_offer(request, offer=None):
         else:
             form = OfferForm(instance=offer, initial={'image_list': ','.join([str(im.id) for im in offer.localofferimage_set.all()])})
 
-    privacy_fields = [form.fields[k] for k in ('list_public', 'list_sharestuffers', 'list_watchers')]
     return render_to_response_context(request, 'offers/edit_offer.html', {'form': form,
                                                                           'offer': offer,
-                                                                          'privacy_fields': privacy_fields,
                                                                           'image_list': offer and offer.image_list or '[]'})
 
 
@@ -143,23 +138,19 @@ def list_offers(request):
     """
     if request.user.is_authenticated():
         userprofile = request.user.get_profile()
-        lat, lon = userprofile.latitude, userprofile.longitude
+        lng, lat = userprofile.location.coords
     else:
         userprofile = None
-        lat, lon = None, None
+        lng, lat = None, None
 
-    # Merge POST input with GET input - GET gets precendence
-#    input = request.POST.copy()
-#    input.update(dict([(f, request.GET.get(f)) for f in OfferListForm.base_fields if f in request.GET]))
-#    form = OfferListForm(input)
     form = OfferListForm(request.REQUEST)
 
     if form.is_valid():
         latitude = form.cleaned_data['latitude']
         longitude = form.cleaned_data['longitude']
         if None in (latitude, longitude):
-            latitude, longitude = lat, lon
-        offers = LocalOffer.objects.filter_by(
+            latitude, longitude = lat, lng
+        offers = LocalOffer.objects.all().filter_by(
             donorprofile=form.cleaned_data['donorprofile'],
             watched_users=form.cleaned_data['watched_users'],
             latitude=latitude,
@@ -208,22 +199,22 @@ def browse_offers(request):
                     {'form': form,
                      'offers': []})
     else:
-        if userprofile and userprofile.latitude and userprofile.longitude:
-            lat, lon = userprofile.latitude, userprofile.longitude
+        if userprofile and userprofile.location:
+            lng, lat = userprofile.location.coords
             location_source = 'userprofile'
         else:
             g = GeoIP()
             ip = request.META.get('REMOTE_ADDR')
-            lat, lon = 52.63639666, 1.29432678223
+            lat, lng = 52.63639666, 1.29432678223
             location_source = 'none'
             if ip:
                 latlon = g.lat_lon(ip)
                 if latlon:
-                    lat, lon = latlon
+                    lat, lng = latlon
                     location_source = 'ip'
         form = OfferBrowseForm(initial={'max_distance': 25,
                                         'latitude': lat,
-                                        'longitude': lon,
+                                        'longitude': lng,
                                         'location_source': location_source})
         offers = []
 
@@ -249,9 +240,8 @@ def view_offer(request, offer_hash):
     userprofile = UserProfile.get_for_user(request.user)
 
     if userprofile:
-        if None not in (userprofile.latitude, userprofile.longitude):
-            qs = LocalOffer.objects.with_distances(userprofile.latitude,
-                                                   userprofile.longitude)
+        if userprofile.location:
+            qs = LocalOffer.objects.distance(userprofile.location)
         else:
             qs = LocalOffer.objects.all()
     else:

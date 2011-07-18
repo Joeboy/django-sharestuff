@@ -1,4 +1,8 @@
-from django.db import models
+#from django.db import models
+from django.contrib.gis.db import models
+from django.contrib.gis.geos import Point
+from django.contrib.gis.measure import Distance
+
 from django.db.models import Q
 from django.core.urlresolvers import reverse
 
@@ -27,11 +31,29 @@ class LocalOfferImage(models.Model):
     caption = models.TextField(blank=True, null=True)
     offer = models.ForeignKey('LocalOffer', blank=True, null=True)
 
+
+class OfferManager(models.GeoManager):
+    """
+    Manager that adds the ability to create custom queryset methods, and also
+    allows access to those methods by the manager itself
+    """
+    
+    def get_query_set(self):
+        return self.model.QuerySet(self.model, using=self._db)
+
+    def __getattr__(self, attr, *args):
+        if attr in ('filter_by_user',
+                    'with_distances',
+                    'filter_by',):
+            return getattr(self.get_query_set(), attr, *args)
+        else:
+            return getattr(self.__class__, attr, *args)
+
+
 class BaseOffer(models.Model):
     """
     Base class for offers
     """
-#    offer_category = models.ForeignKey(OfferCategory, blank=True, null=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
     date_time_added = models.DateTimeField(blank=True, default=datetime.datetime.now, db_index=True)
@@ -42,8 +64,9 @@ class BaseOffer(models.Model):
     show_sharestuffers = models.BooleanField("Show details to people logged into ShareStuff")
     show_watchers = models.BooleanField("Show details to people watching me")
 
-    latitude = models.FloatField()
-    longitude = models.FloatField()
+#    latitude = models.FloatField()
+#    longitude = models.FloatField()
+    location = models.PointField()
     
     class Meta:
         abstract = True
@@ -52,24 +75,6 @@ class BaseOffer(models.Model):
     
     def __unicode__(self):
         return u'%s' % (self.title)
-
-class OfferManager(models.Manager):
-    """
-    Manager that adds the ability to create custom queryset methods, and also
-    allows access to those methods by the manager itself
-    """
-    
-    def get_query_set(self):
-        return self.model.QuerySet(self.model)
-
-    def __getattr__(self, attr, *args):
-        if attr in ('filter_by_user',
-                    'with_distances',
-                    'filter_by',):
-            return getattr(self.get_query_set(), attr, *args)
-        else:
-            return getattr(self.__class__, attr, *args)
-
 
 
 class LocalOffer(BaseOffer):
@@ -93,13 +98,7 @@ class LocalOffer(BaseOffer):
     objects = OfferManager()
     tags = TaggableManager(blank=True)
 
-    class QuerySet(models.query.QuerySet):
-        def with_distances(self, latitude, longitude):
-            """
-            Add distances to the query results using pg's earth_distance function
-            """
-            return self
-#            return self.extra(select={'distance':'earth_distance(ll_to_earth(%s,%s), ll_to_earth(offers_localoffer.latitude, offers_localoffer.longitude))/1000'}, select_params=(latitude, longitude))
+    class QuerySet(models.query.GeoQuerySet):
         
         def filter_by_user(self, userprofile):
             """
@@ -148,19 +147,14 @@ class LocalOffer(BaseOffer):
             
             offers = offers.filter_by_user(asking_userprofile)
 
-#            if longitude is not None and latitude is not None:
-#                offers = offers.with_distances(latitude, longitude)
-#
-#                if max_distance is not None:
-#                    # This is way inefficient - TODO: do some prefiltering based
-#                    # on cheaper geometry
-#                    # also, it's disgusting. In God's name do something about it.
-#                    RE = re.compile(r'(WHERE|AND) \("taggit_tag"."name" IN \(([^)]+)\)')
-#                    def f(s):
-#                        return '%s ("taggit_tag"."name" IN (\'%s\')' % (s.group(1), "', '".join(s.group(2).split(', ')),)
-#                    sql = RE.sub(f, unicode(offers.query))
-#                    sql = "select *, distance from (%s) as x where distance<%s" % (sql, max_distance)
-#                    offers = LocalOffer.objects.raw(sql)
+            if longitude is not None and latitude is not None:
+                location = Point(longitude, latitude)
+
+                if max_distance is not None:
+                    area = (location, Distance(km=max_distance))
+                    offers = LocalOffer.objects.filter(location__distance_lte=area).distance(location)
+                else:
+                    offers = offers.distance(location)
 
             return offers
 

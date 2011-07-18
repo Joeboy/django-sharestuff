@@ -1,6 +1,7 @@
-from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.contrib.gis.db import models
+from django.contrib.gis.geos import Point
 
 from utils.dbfields import UKPhoneNumberField, UKPostcodeField
 
@@ -24,8 +25,9 @@ class UserProfile(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     info = models.TextField(null=True, blank=True)
     postcode = UKPostcodeField(null=True, blank=True)
-    latitude = models.FloatField(blank=True, null=True)
-    longitude = models.FloatField(blank=True, null=True)
+#    latitude = models.FloatField(blank=True, null=True)
+#    longitude = models.FloatField(blank=True, null=True)
+    location = models.PointField(blank=True, null=True)
 
     email_contact = models.BooleanField("Email me when people contact me about my offers", default=True)
 

@@ -32,11 +32,7 @@
 
     <p id="location-intro">Please enter your latitude and longitude below. Note that you are seeing a fallback, low-tech version of this page. If you were using a recent browser with javascript activated you would be able to set your location using a marker on a map, and we might be able to guess your location automatically.</p>
 
-    <p>{{ userprofile_form.latitude.label }}:
-    {{ userprofile_form.latitude }}</p>
-    <p>{{ userprofile_form.longitude.label }}:
-    {{ userprofile_form.longitude }}</p>
-
+    <p>Location: {{ userprofile_form.location }}</p>
 
     <p>About me:</p>
     <p>{{ userprofile_form.info }}</p>
