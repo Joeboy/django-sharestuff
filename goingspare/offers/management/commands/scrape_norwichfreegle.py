@@ -9,6 +9,7 @@ from datetime import datetime
 import re
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.contrib.gis.geos import Point
 from offers.models import LocalOffer
 from optparse import make_option
 from geo.models import Outcode
@@ -99,8 +100,7 @@ def load_offers(offers):
                                              donor=freegle_up,
                                              date_time_added=offer[0],
                                              defaults={'description': "Description not available",
-                                                       'latitude': outcode.lat,
-                                                       'longitude': outcode.lng,
+                                                       'location': Point(outcode.lng, outcode.lat),
                                                        'list_watchers': True,
                                                        'show_watchers': True})
 
