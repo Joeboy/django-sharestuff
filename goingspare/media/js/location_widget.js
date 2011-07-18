@@ -60,7 +60,7 @@ function doLocationWidget() {
     var loc = locInput.val()
     var z = pointRe.exec(loc);
     var lat, lng;
-    if (z.length == 3) {
+    if (z && z.length == 3) {
         lng = z[1];
         lat = z[2];
     } else lat = lng = '';
