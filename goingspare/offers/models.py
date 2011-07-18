@@ -152,7 +152,7 @@ class LocalOffer(BaseOffer):
 
                 if max_distance is not None:
                     area = (location, Distance(km=max_distance))
-                    offers = LocalOffer.objects.filter(location__distance_lte=area).distance(location)
+                    offers = offers.filter(location__distance_lte=area).distance(location)
                 else:
                     offers = offers.distance(location)
 
