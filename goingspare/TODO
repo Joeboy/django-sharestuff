@@ -2,12 +2,14 @@
 TO DO
 =====
 
- * This thing is a mess. I'm not really maintaining a TODO list anymore
- * Aggregate / search remote listings
+ * Pagination
  * Stop sucking and write some more goddam tests
  * Beautify everything
+ * Thumbnail pics properly
+ * Load test
  * Facebook / openid login
- * Save/RSS/link/share searches
+ * Save/RSS/link/share/homepage searches
  * Paginate stuff
  * Rethink 'TAKEN' process
  * Android app
+ * Aggregate / search remote listings

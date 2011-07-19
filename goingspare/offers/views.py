@@ -160,8 +160,14 @@ def list_offers(request):
             max_distance=form.cleaned_data['max_distance'])
         paginator = Paginator(list(offers), OFFERS_PER_PAGE)
         page = request.GET.get('page', 1)
+        try:
+            page = paginator.page(request.GET.get('page', 1))
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+        except PageNotAnInteger:
+            page = paginator.page(1)
 
-        c = RequestContext(request, {'page': paginator.page(page)})
+        c = RequestContext(request, {'page': page})
         if request.is_ajax():
             t = get_template('offers/list_offers_nochrome.html')
             return JsonResponse({'html': t.render(c)})
