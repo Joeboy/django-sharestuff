@@ -1,5 +1,11 @@
+{% load offer_tags %}
 {% for offer in page.object_list %}
+{% if forloop.first %}
+{% endif %}
 {% include "offers/offer_listing.html" %}
+{% if forloop.last %}
+{% pagination_bar %}
+{% endif %}
 {% empty %}
 <p>No offers.</p>
 {% endfor %}

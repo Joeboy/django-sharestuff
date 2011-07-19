@@ -158,7 +158,7 @@ def list_offers(request):
             asking_userprofile=userprofile,
             tags=form.cleaned_data['tags'],
             max_distance=form.cleaned_data['max_distance'])
-        paginator = Paginator(list(offers), OFFERS_PER_PAGE)
+        paginator = Paginator(offers, OFFERS_PER_PAGE)
         page = request.GET.get('page', 1)
         try:
             page = paginator.page(request.GET.get('page', 1))
@@ -194,7 +194,7 @@ def browse_offers(request):
         if request.is_ajax():
             return list_offers(request)
 
-        offers, form = get_offers(request.POST, {'asking_userprofile':userprofile})
+        offers, form = get_offers(request.REQUEST, {'asking_userprofile':userprofile})
         if form.errors:
             if request.is_ajax():
                 return JsonResponse({'errors': form.errors})
@@ -224,7 +224,7 @@ def browse_offers(request):
                                         'location_source': location_source})
         offers = []
 
-    paginator = Paginator(list(offers), OFFERS_PER_PAGE)
+    paginator = Paginator(offers, OFFERS_PER_PAGE)
     page = paginator.page(request.GET.get('page', 1))
     return render_to_response_context(request,
                                       'offers/browse_offers.html',

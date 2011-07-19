@@ -65,16 +65,50 @@ jQuery(function() {
         jQuery('#errors').append(error_output);
     }
 
+    function getUrlVars(url) {
+        var vars = {};
+        var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            vars[key] = value;
+        });
+        return vars;
+    }
+
+    var update_pagination_links = function() {
+        jQuery('.pagination-bar a').click(function() {
+            var getVars = getUrlVars(this.href);
+            page = (getVars.page ? getVars.page : '')
+            jQuery.ajax({url: post_url+'?page='+page,
+                   type:'POST',
+                   data: posted_data,
+                   dataType:'json',
+                   success: update_offers;
+            });
+            return false;
+        });
+    }
+
+    var posted_data;
+    var post_url;
+
+    update_offers = function(data) {
+        jQuery('#errors').empty();
+        if (data.errors) {
+            update_errors(data.errors);
+        } else {
+            jQuery('#offer-list').html(data.html);
+            update_pagination_links();
+        }
+    };
+
     jQuery('#offer-filter-form').ajaxForm({
         dataType:'json',
-        success: function(data) {
-            jQuery('#errors').empty();
-            if (data.errors) {
-                update_errors(data.errors);
-            } else {
-                jQuery('#offer-list').html(data.html);
-            }
-        }});
+        success: update_offers,
+        beforeSubmit: function(data) {
+            post_url = this.url;
+            posted_data = data;
+        }
+    });
+
 });
 </script>
 {% endblock %}
@@ -83,8 +117,8 @@ jQuery(function() {
 <div id="location-dialog" style="display:none">
       <div style="height:200px;" id="map-placeholder"></div>
         <p>This is my best guess at your location. If it's wrong you can change it 
-        {% if request.user.is_authentication %}
-        in your user settings - click the 'You' button at the top of the page.
+        {% if request.user.is_authenticated %}
+        in your <a href="{% url edit-userprofile %}">user settings</a>.
         {% else %}
         by logging in and changing your user settings.
         {% endif %}
@@ -93,7 +127,7 @@ jQuery(function() {
 
 <h2>Search Offers</h2>
 
-<form id="offer-filter-form" action="" method="post">
+<form id="offer-filter-form" action="{{ request.path }}" method="post">
 <div id="errors">
 {% if form.errors %}
 <p>Sorry, we couldn't make sense of the data you submitted:</p>
@@ -110,10 +144,17 @@ jQuery(function() {
 </form>
 
 <div id="offer-list">
+{% if request.REQUEST.keys %}
+{% include "offers/list_offers_nochrome.html" %}
+{% endif %}
+</div>
+{% comment %}
+<div id="offer-list">
     {% for offer in page.object_list %}
     {% include "offers/offer_listing.html" %}
     {% endfor %}
     {% pagination_bar %}
 </div>
+{% endcomment %}
 
 {% endblock %}
