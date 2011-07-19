@@ -136,11 +136,10 @@ def list_offers(request):
     Sorta the same as browse_offers, but for direct linking rather than
     filtering via a form
     """
-    if request.user.is_authenticated():
-        userprofile = request.user.get_profile()
+    userprofile = UserProfile.get_for_user(request.user)
+    if userprofile and userprofile.location:
         lng, lat = userprofile.location.coords
     else:
-        userprofile = None
         lng, lat = None, None
 
     form = OfferListForm(request.REQUEST)
