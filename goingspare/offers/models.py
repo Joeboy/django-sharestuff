@@ -43,7 +43,6 @@ class OfferManager(models.GeoManager):
 
     def __getattr__(self, attr, *args):
         if attr in ('filter_by_user',
-                    'with_distances',
                     'filter_by',):
             return getattr(self.get_query_set(), attr, *args)
         else:

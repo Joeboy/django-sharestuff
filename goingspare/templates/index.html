@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
+{% load offer_tags %}
 
 {% block content %}
 
+<div id="homepage-explanation">
 <h3>What is this thing?</h3>
 
 <p><em>ShareStuff is a Freecycle-inspired tool to help you share your unwanted stuff with your community. It's not yet finished, but it's already functional and useful. Please <a href="/user/register/">register</a>, use it and <a href="http://www.joebutton.co.uk/contact-me/">send me feedback</a>.</em></p> 
@@ -15,12 +17,11 @@
 </ul>
 
 <p>For development information or source code, go <a href="https://github.com/Joeboy/django-sharestuff">here</a>.</p>
+</div>
 
+<div id="homepage-offers">
 <h2>Latest {% if user.is_anonymous %}publicly viewable {% endif %}offers</h2>
-{% for offer in offers %}
-{% include 'offers/offer_listing.html' %}
-{% empty %}
-<p>No offers.</p>
-{% endfor %}
+{% include "offers/list_offers_nochrome.html" %}
+</div>
 
 {% endblock %}

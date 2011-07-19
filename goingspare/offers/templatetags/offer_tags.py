@@ -58,7 +58,7 @@ def pagination_bar(context):
         next = ''
 
     page_links = ' '.join([
-        ((p == page_no) and unicode(p) or page_link_tag(p, unicode(p)))
+        ((p == page_no) and "<strong>%d</strong>" % p or page_link_tag(p, unicode(p)))
             for p in page.paginator.page_range])
 
     return '<p class="pagination-bar">%s %s %s</p>' % (prev, page_links, next)

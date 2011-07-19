@@ -224,3 +224,14 @@ div.small-thumb img{
 #id_max_distance {
     width: 2em;
 }
+
+#homepage-offers {
+    max-width:400px;
+}
+
+#homepage-explanation {
+    border:1px solid #cdc;
+    padding:5px;
+    max-width: 310px;
+    float:right;
+}
