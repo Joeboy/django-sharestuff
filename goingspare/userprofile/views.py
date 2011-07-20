@@ -122,7 +122,7 @@ def watch_user(request, user_id, unwatch=False):
         request.user.get_profile().watched_users.remove(watched_userp)
     else:
         request.user.get_profile().watched_users.add(watched_userp)
-    return HttpResponseRedirect(reverse('view-userprofile', kwargs={'user_id':user_id}))
+    return HttpResponseRedirect(reverse('user-offers', kwargs={'username':watched_userp.user.username}))
 
 @staffmember_required
 def manage_users(request):
