@@ -5,7 +5,7 @@ import ClientForm
 import re
 from pyquery import PyQuery
 import lxml
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -81,28 +81,42 @@ def get_offers(html):
 
 def load_offers(offers):
     offer_re = re.compile(r'^offer(?:ed)?\b\s*:?-?\s*(.*)\s*$', re.I)
+    taken_re = re.compile(r'^taken\b\s*:?-?\s*(.*)\s*$', re.I)
     postcode_re = re.compile(r'\b(NR\d+)\b', re.I)
     freegle_up = User.objects.get(username='norwichfreegle').get_profile()
+    # The way we match 'taken' message to offers is a bit sketchy. Let's only
+    # check offers from the last month to cut down false positives
+    recent_era = datetime.now() - timedelta(days=30)
 #    LocalOffer.objects.filter(donor=freegle_up).delete()
     for offer in offers:
         match = offer_re.match(offer[1])
-        if not match:
-            continue
-        title = match.group(1)
-        match = postcode_re.search(title)
-        if not match:
-            continue
-        try:
-            outcode = Outcode.objects.get(outcode=match.group(1).upper())
-        except Outcode.DoesNotExist:
-            continue
-        o = LocalOffer.objects.get_or_create(title=title,
-                                             donor=freegle_up,
-                                             date_time_added=offer[0],
-                                             defaults={'description': "Description not available",
-                                                       'location': Point(outcode.lng, outcode.lat),
-                                                       'list_watchers': True,
-                                                       'show_watchers': True})
+        if match:
+            title = match.group(1)
+            match = postcode_re.search(title)
+            if not match:
+                continue
+            try:
+                outcode = Outcode.objects.get(outcode=match.group(1).upper())
+            except Outcode.DoesNotExist:
+                continue
+            o = LocalOffer.objects.get_or_create(title=title,
+                                                 donor=freegle_up,
+                                                 date_time_added=offer[0],
+                                                 defaults={'description': "Description not available",
+                                                           'location': Point(outcode.lng, outcode.lat),
+                                                           'list_watchers': True,
+                                                           'show_watchers': True})
+        else:
+            match = taken_re.match(offer[1])
+            if match:
+                matching_offers = LocalOffer.objects.filter(title=match.group(1),
+                                                            taken=False,
+                                                            date_time_added__gt=recent_era)
+                if matching_offers:
+                    offer = matching_offers[0]
+                    offer.taken = True
+                    offer.save()
+
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
