@@ -16,8 +16,8 @@
 <td><p>{{offer.description|truncatewords:10}}</p></td>
 <td><a href="{% url edit-offer offer.id %}">Edit</a></td>
 <td><a href="{% url delete-offer offer.id %}">Delete</a></td>
-<td><a href="{% url email-offer-list offer_hash=offer.hash %}">Email to list</a></td>
-<td><a href="{% url mark-taken offer_hash=offer.hash %}">Taken</a></td>
+<td>{% if not offer.taken %}<a href="{% url email-offer-list offer_hash=offer.hash %}">Email to list</a>{% endif %}</td>
+<td>{% if not offer.taken %}<a href="{% url mark-taken offer_hash=offer.hash %}">Taken</a>{% endif %}</td>
 </tr>
 {% endfor %}
 </table>

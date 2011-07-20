@@ -17,4 +17,4 @@ class UserActivityFeed(Feed):
         return item.description
 
     def items(self, obj):
-        return obj.localoffer_set.all()
+        return obj.localoffer_set.filter_by_user(None)

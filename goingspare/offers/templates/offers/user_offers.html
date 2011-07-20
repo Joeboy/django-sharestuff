@@ -3,22 +3,9 @@
 {% block content %}
 <h2>{{donor.get_best_name}}</h2>
 
-{% if donor.localoffer_set.all %}
-<h3>Offers:</h3>
-    {% for offer in donor.localoffer_set.all %}
-        <div class="{% cycle 'light-row' 'dark-row' %}">
-        {% if offer.localofferimage_set.all %}
-        <div style="float:right" class="small-thumb">
-        <a href="{{ offer.localofferimage_set.all.0.image.url }}"><img title="{{ offer.localofferimage_set.all.0.caption }}" alt="{{ offer.localofferimage_set.all.0.caption }}" src="{{ offer.localofferimage_set.all.0.image.url }}" /></a>
-        </div>
-        {% endif %}
-        {% include 'offers/offer_listing.html' %}
-        <div style="clear:both"></div>
-        </div>
-    {% endfor %}
-{% else %}
-    <h3>No offers</h3>
-{% endif %}
+<p>{{ donor.info|linebreaks }}</p>
+
+<p><a href="{% url list-offers %}?donor={{ donor.user.username}}">{{ offers.count }} offer{{ offers.count|pluralize }}</a></p>
 
 {% if user.is_authenticated %}
     {% if donor in user.get_profile.watched_users.all %}
