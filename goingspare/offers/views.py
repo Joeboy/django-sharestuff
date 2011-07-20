@@ -10,7 +10,8 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.contrib.gis.utils import GeoIP
 from django.template.loader import get_template
-from django.template import RequestContext
+from django.template import Context, RequestContext
+from django.template.defaultfilters import slugify
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
@@ -92,7 +93,7 @@ def delete_offer(request, offer):
 
 
 @user_offer
-def email_offer_to_list(request, offer):
+def email_offer_to_list(request, offer, subscription_id=None):
     userprofile = request.user.get_profile()
     if request.POST:
         form = EmailOfferToListForm(request.POST, userprofile=userprofile)
@@ -100,7 +101,7 @@ def email_offer_to_list(request, offer):
             msg = EmailMessage(
                 subscription=form.cleaned_data['subscription'],
                 offer=offer,
-                message_type=form.cleaned_data['message_type'],
+                message_type='offer',
                 subject=form.cleaned_data['subject'],
                 body=form.cleaned_data['message'],
             )
@@ -109,13 +110,103 @@ def email_offer_to_list(request, offer):
             return HttpResponseRedirect(reverse('my-offers'))
     else:
         initial = {}
-        if userprofile.subscription_set.count() == 1:
-            initial['subscription'] = userprofile.subscription_set.get()
+        subscriptions = userprofile.subscription_set.all()
+        if subscriptions.count() == 0:
+            return HttpResponseRedirect(reverse('add-subscription'))
+
+        subscription = userprofile.subscription_set.all()[0]
+        template_name = 'email_lists/messages/%s/offer.html' % (
+                         slugify(subscription.email_list.name))
+        initial['subscription'] = subscription
+        mail_template = get_template(template_name)
+        c = Context({'offer': offer, 'userprofile':userprofile})
+        m = mail_template.render(c)
+        subject, message = m.split('\n', 1)
+        initial = {'subscription': subscription,
+                   'subject': subject,
+                   'message': message}
         form = EmailOfferToListForm(userprofile=request.user.get_profile(),
                                     initial=initial)
     c = {'offer': offer,
          'form': form}
     return render_to_response_context(request, 'offers/email_offer_to_list.html', c)
+
+
+from .forms import EmailTakenToListForm
+from django.forms.formsets import formset_factory
+from django.utils.text import wrap
+from itertools import ifilter
+EmailTakenToListFormset = formset_factory(EmailTakenToListForm, extra=0)
+
+def quote_email(text):
+    s = wrap(text, 75)
+    return '\n'.join(['> %s' % l for l in s.split('\n')])
+
+def takenify_subject(subject):
+    a, b = subject.split(':', 1)
+    return 'TAKEN:%s' % b
+
+def filter_unique_subscription(messages):
+    seen = []
+    def f(m):
+        if m.subscription.id in seen:
+            return False
+        seen.append(m.subscription.id)
+        return True
+    return ifilter(f, messages)
+    
+
+@transaction.commit_on_success
+@user_offer
+def mark_taken(request, offer):
+    userprofile = UserProfile.get_for_user(request.user)
+    offer_messages = offer.emailmessage_set.filter(message_type='offer').order_by('datetime_sent')
+
+    if offer_messages:
+        messages = filter_unique_subscription(offer_messages)
+        if request.POST:
+            formset = EmailTakenToListFormset(request.POST)
+            if formset.is_valid():
+                msgs = []
+                for data in formset.cleaned_data:
+                    # remmeber to check subs are ok for user
+                    if not data['send_email']:
+                        continue
+                    if data['subscription'] not in userprofile.subscription_set.all():
+                        raise PermissionDenied
+                    msg = EmailMessage(
+                        subscription=data['subscription'],
+                        offer=offer,
+                        message_type='taken',
+                        subject=data['subject'],
+                        body=data['body'],
+                    )
+                    msg.save()
+                    msgs.append(msg)
+                for msg in msgs:
+                    msg.send_mail()
+                offer.taken = True
+                offer.save()
+                return HttpResponseRedirect(reverse('my-offers'))
+        else:
+            initial = [{'subscription': m.subscription,
+                        'subject': takenify_subject(m.subject),
+                        'body': quote_email(m.body)} for m in messages]
+            formset = EmailTakenToListFormset(initial=initial)
+
+        c = {'offer': offer,
+             'formset': formset}
+        return render_to_response_context(request, 'offers/email_taken_to_list.html', c)
+    else:
+        confirmation = request.GET.get('confirm')
+        if confirmation == 'yes':
+            offer.taken = True
+            offer.save()
+            return HttpResponseRedirect(reverse('my-offers'))
+        elif confirmation == 'no':
+            return HttpResponseRedirect(reverse('my-offers'))
+        else:
+            return render_to_response_context(request, 'offers/confirm_mark_taken.html')
 
 
 def get_offers(input, extra=None):

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+<script type="text/javascript">
+jQuery(function() {
+    jQuery('.formset').each(function() {
+        var formset = jQuery(this);
+        var cb = formset.find('input[type="checkbox"]');
+        var hide_inputs = function() {
+            formset.find('p').hide();
+            formset.find('input[type="checkbox"]').closest('p').show();
+        };
+        var show_inputs = function() {
+            formset.find('p').show();  
+        };
+        var update_inputs = function(checkbox) {
+            if (checkbox.attr('checked')) show_inputs();
+            else hide_inputs();
+        };
+        cb.click(function() {update_inputs(cb)});
+        update_inputs(cb);
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="post">
+{{ formset.management_form }}
+<p>You've sent details of this offer to the following email list{{ formset|pluralize }}. Do you want to send 'TAKEN' emails to {{ formset|pluralize:"the list,those lists" }}?</p>
+<div id="email-offer-to-list-form">
+{% for form in formset %}
+<h4>{{ form.initial.subscription.email_list.name }}</h4>
+<div class="formset">
+{{ form.as_p }}
+</div>
+{% endfor %}
+<input type="submit" value="Send" />
+</div>
+</form>
+
+{% endblock%}

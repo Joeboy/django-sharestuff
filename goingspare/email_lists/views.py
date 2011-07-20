@@ -1,10 +1,12 @@
 import json
 
 from django import forms
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.template.loader import get_template
 from django.template import Context
+from django.template.defaultfilters import slugify
 
 from email_lists.models import EmailList
 from userprofile.models import Subscription
@@ -44,8 +46,9 @@ def add_subscription(request):
 
 
 @user_offer
-def get_message(request, offer=None, message_type=None, offer_hash=None):
-    t = get_template('email_lists/messages/%s.html' % (message_type))
+def get_message(request, offer=None, subscription_id=None, offer_hash=None):
+    subscription = get_object_or_404(Subscription, id=subscription_id)
+    t = get_template('email_lists/messages/%s/offer.html' % (slugify(subscription.email_list.name),))
     c = Context({'userprofile': request.user.get_profile(),
                  'offer': offer, })
     m = t.render(c)

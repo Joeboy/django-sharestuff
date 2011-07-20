@@ -235,3 +235,26 @@ div.small-thumb img{
     max-width: 310px;
     float:right;
 }
+
+p.formfield {
+    margin-top:2em;
+}
+
+#email-offer-to-list-form #id_subject {
+    width:400px;
+}
+#email-offer-to-list-form input, #email-offer-to-list-form textarea {
+    margin-left:10px;
+    padding:0px;
+}
+
+#email-offer-to-list-form label {
+    display:block;
+    text-align:right;
+    float:left;
+    width:80px;
+}
+
+
+
+

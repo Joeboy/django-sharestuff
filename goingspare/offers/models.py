@@ -90,6 +90,7 @@ class LocalOffer(BaseOffer):
         return base36 or B36_ALPHABET[0]
 
     live_status = models.BooleanField("Active", default=True)
+    taken = models.BooleanField()
     donor = models.ForeignKey(UserProfile)
     # A slightly obfuscated id for public use:
     hash = models.CharField(max_length=25, unique=True, db_index=True, blank=True)

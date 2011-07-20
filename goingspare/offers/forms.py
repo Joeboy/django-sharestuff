@@ -37,16 +37,22 @@ MESSAGE_TYPE_CHOICES = ((0, '-------'), ('offer', 'Offer'), ('taken', 'Taken'),)
 
 
 class EmailOfferToListForm(forms.Form):
-    subscription = forms.ModelChoiceField(queryset=Subscription.objects.none())
+    subscription = forms.ModelChoiceField(queryset=Subscription.objects.none(), empty_label=None)
     subject = forms.CharField()
     message = forms.CharField(widget=forms.Textarea)
-    message_type = forms.ChoiceField(choices=MESSAGE_TYPE_CHOICES, required=False)
 
     def __init__(self, *args, **kwargs):
         userprofile = kwargs.pop('userprofile')
         super(EmailOfferToListForm, self).__init__(*args, **kwargs)
         self.fields['subscription'].queryset = userprofile.subscription_set.all()
 
+
+class EmailTakenToListForm(forms.Form):
+    send_email = forms.BooleanField(required=False)
+    subscription = forms.ModelChoiceField(queryset=Subscription.objects.all(), empty_label=None, widget=forms.HiddenInput)
+    subject = forms.CharField()
+    body = forms.CharField(widget=forms.Textarea)
+    
 
 class OfferListForm(forms.Form):
     """
