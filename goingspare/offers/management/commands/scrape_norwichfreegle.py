@@ -80,8 +80,8 @@ def get_offers(html):
 
 
 def load_offers(offers):
-    offer_re = re.compile(r'^offer(?:ed)?\b\s*:?-?\s*(.*)\s*$', re.I)
-    taken_re = re.compile(r'^taken\b\s*:?-?\s*(.*)\s*$', re.I)
+    offer_re = re.compile(r'^offer(?:ed)?\b\s*[.:-]?\s*(.*)\s*$', re.I)
+    taken_re = re.compile(r'^taken\b\s*[.:-]?\s*(.*)\s*$', re.I)
     postcode_re = re.compile(r'\b(NR\d+)\b', re.I)
     freegle_up = User.objects.get(username='norwichfreegle').get_profile()
     # The way we match 'taken' message to offers is a bit sketchy. Let's only

@@ -57,7 +57,7 @@ class UserProfile(models.Model):
         return "%s's UserProfile" % self.user.username
 
     def get_absolute_url(self):
-        return reverse('view-userprofile', kwargs={'user_id':self.id})
+        return reverse('user-offers', kwargs={'username':self.user.username})
 
     @staticmethod
     def get_for_user(user):
