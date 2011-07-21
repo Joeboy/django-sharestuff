@@ -331,10 +331,13 @@ def browse_offers(request):
 def user_offers(request, username):
     donor = get_object_or_404(UserProfile, user__username=username)
     userprofile = UserProfile.get_for_user(request.user)
-    offers = LocalOffer.objects.filter(donor=donor).filter_by_user(userprofile)
+    offers = LocalOffer.objects.filter(donor=donor, taken=False).filter_by_user(userprofile)
+    live_offers = LocalOffer.objects.filter(donor=donor, taken=False, live_status=True)
+    unavailable_offers_count = live_offers.count() - offers.count()
     return render_to_response_context(request,
                                       'offers/user_offers.html',
                                       {'offers': offers,
+                                       'unavailable_offers_count': unavailable_offers_count,
                                        'donor': donor})
 
 
