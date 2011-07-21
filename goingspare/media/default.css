@@ -256,5 +256,10 @@ p.formfield {
 }
 
 
-
+#saved-filters {
+    float:right;
+    width: 200px;
+    border: 1px solid #bcb;
+    padding:3px;
+}
 

@@ -19,6 +19,7 @@ from django.utils.text import wrap
 
 from offers.models import LocalOffer
 from userprofile.models import UserProfile
+from saved.models import SavedFilter
 from goingspare.utils import render_to_response_context
 from goingspare.utils.http import JsonResponse
 from goingspare.offers.decorators import user_offer
@@ -322,10 +323,12 @@ def browse_offers(request):
 
     paginator = Paginator(offers, OFFERS_PER_PAGE)
     page = paginator.page(request.GET.get('page', 1))
+    saved_filters = SavedFilter.objects.filter(owner=userprofile)
     return render_to_response_context(request,
                                       'offers/browse_offers.html',
                                       {'form': form,
-                                       'page': page})
+                                       'page': page,
+                                       'saved_filters':saved_filters})
 
 
 def user_offers(request, username):

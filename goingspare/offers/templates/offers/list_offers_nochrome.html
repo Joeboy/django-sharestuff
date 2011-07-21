@@ -1,10 +1,12 @@
 {% load offer_tags %}
+{% load save_tags %}
 {% for offer in page.object_list %}
 {% if forloop.first %}
 {% endif %}
 {% include "offers/offer_listing.html" %}
 {% if forloop.last %}
 {% pagination_bar %}
+{% if request.user.is_authenticated %}<p><a href="{% save_search %}">Save this search</a></p>{% endif %}
 {% endif %}
 {% empty %}
 <p>No offers.</p>

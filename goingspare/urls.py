@@ -7,6 +7,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^$', 'goingspare.views.index', name='homepage'),
     url(r'^offers/', include('offers.urls')),
+    url(r'^saved/', include('saved.urls')),
     url(r'^user/', include ('userprofile.urls')),
     url(r'^email-lists/', include('email_lists.urls')),
     url(r'^notifications/', include('notifications.urls')),

@@ -92,6 +92,7 @@ INSTALLED_APPS = (
     'goingspare.userprofile',
     'goingspare.utils',
     'goingspare.notifications',
+    'goingspare.saved',
     'goingspare.oauth',
     'sentry',
     'sentry.client',

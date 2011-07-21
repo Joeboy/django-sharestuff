@@ -11,12 +11,10 @@ from django.conf import settings
 from taggit.managers import TaggableManager
 
 from userprofile.models import UserProfile
+from goingspare.utils import get_random_hash
 import datetime
-import random
 import json
 import re
-
-B36_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
 
 
 class OfferCategory(models.Model):
@@ -80,15 +78,6 @@ class LocalOffer(BaseOffer):
     """
     An offer hosted on this website
     """
-    @staticmethod
-    def get_random_hash():
-        number = random.getrandbits(64)
-        base36 = ''
-        while number:
-            number, i = divmod(number, 36)
-            base36 = B36_ALPHABET[i] + base36
-        return base36 or B36_ALPHABET[0]
-
     live_status = models.BooleanField("Active", default=True)
     taken = models.BooleanField()
     donor = models.ForeignKey(UserProfile)
@@ -183,7 +172,7 @@ class LocalOffer(BaseOffer):
 
     def save(self, *args, **kwargs):
         if not self.hash:
-            self.hash = self.get_random_hash()
+            self.hash = get_random_hash()
         super(LocalOffer, self).save(*args, **kwargs)
 
     def image_list(self):

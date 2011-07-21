@@ -127,6 +127,15 @@ jQuery(function() {
 
 <h2>Search Offers</h2>
 
+<div id="saved-filters">
+<h4>Saved searches</h4>
+{% for saved_filter in saved_filters %}
+<p><a href="{{ saved_filter.get_absolute_url }}">{{ saved_filter.name }}</a></p>
+{% empty %}
+<p>No saved searches.</p>
+{% endfor %}
+</div>
+
 <form id="offer-filter-form" action="{{ request.path }}" method="post">
 <div id="errors">
 {% if form.errors %}
@@ -148,13 +157,5 @@ jQuery(function() {
 {% include "offers/list_offers_nochrome.html" %}
 {% endif %}
 </div>
-{% comment %}
-<div id="offer-list">
-    {% for offer in page.object_list %}
-    {% include "offers/offer_listing.html" %}
-    {% endfor %}
-    {% pagination_bar %}
-</div>
-{% endcomment %}
 
 {% endblock %}
