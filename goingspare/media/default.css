@@ -30,6 +30,10 @@ a:hover {
     color: #5e5;
 }
 
+a img {
+    border: 0;
+}
+
 #container {
     max-width: 850px;
     border-width: 0px 1px 0px 1px;
