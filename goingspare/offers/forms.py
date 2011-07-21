@@ -2,6 +2,8 @@ import re
 
 from django.contrib.gis import forms
 from django.forms.util import ErrorList
+from django.forms.formsets import formset_factory
+
 from taggit.forms import TagField
 
 from offers.models import LocalOffer, LocalOfferImage
@@ -54,6 +56,9 @@ class EmailTakenToListForm(forms.Form):
     body = forms.CharField(widget=forms.Textarea)
     
 
+EmailTakenToListFormset = formset_factory(EmailTakenToListForm, extra=0)
+
+
 class OfferListForm(forms.Form):
     """
     Form for getting a specified list of offers
@@ -68,7 +73,7 @@ class OfferListForm(forms.Form):
     def clean(self):
         cleaned_data = self.cleaned_data
         # Make sure tags are squeaky clean, as we do insanitary stuff with them
-        # in our sql queries
+        # in our sql queries. Update - actually we don't. can prob remove?
         for tag in cleaned_data.get('tags', ()):
             if not tag.isalnum():
                 self._errors['tags'] = ErrorList(['Tags must contain only alphanumeric characters.'])

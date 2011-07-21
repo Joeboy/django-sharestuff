@@ -1,3 +1,4 @@
+from itertools import ifilter
 from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
 
@@ -13,18 +14,18 @@ from django.template.loader import get_template
 from django.template import Context, RequestContext
 from django.template.defaultfilters import slugify
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.utils.text import wrap
 
 
 from offers.models import LocalOffer
 from userprofile.models import UserProfile
-
 from goingspare.utils import render_to_response_context
 from goingspare.utils.http import JsonResponse
 from goingspare.offers.decorators import user_offer
 from notifications.models import Notification
 from email_lists.models import EmailMessage
 from .forms import (OfferForm, EmailOfferToListForm, OfferListForm,
-                    OfferBrowseForm, OfferContactForm)
+                    OfferBrowseForm, OfferContactForm, EmailTakenToListFormset)
 
 
 OFFERS_PER_PAGE = 10
@@ -132,21 +133,27 @@ def email_offer_to_list(request, offer, subscription_id=None):
     return render_to_response_context(request, 'offers/email_offer_to_list.html', c)
 
 
-from .forms import EmailTakenToListForm
-from django.forms.formsets import formset_factory
-from django.utils.text import wrap
-from itertools import ifilter
-EmailTakenToListFormset = formset_factory(EmailTakenToListForm, extra=0)
-
 def quote_email(text):
+    """
+    wrap and add leading '>'s to a message
+    """
     s = wrap(text, 75)
     return '\n'.join(['> %s' % l for l in s.split('\n')])
 
+
 def takenify_subject(subject):
+    """
+    Turn an "Offered" subject into a "Taken subject"
+    """
     a, b = subject.split(':', 1)
     return 'TAKEN:%s' % b
 
+
 def filter_unique_subscription(messages):
+    """
+    Take a list of messages and return a list with ones sent via duplicate
+    subscriptions removed
+    """
     seen = []
     def f(m):
         if m.subscription.id in seen:
@@ -169,7 +176,6 @@ def mark_taken(request, offer):
             if formset.is_valid():
                 msgs = []
                 for data in formset.cleaned_data:
-                    # remmeber to check subs are ok for user
                     if not data['send_email']:
                         continue
                     if data['subscription'] not in userprofile.subscription_set.all():
