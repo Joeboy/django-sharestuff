@@ -73,6 +73,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
+    'socialregistration.middleware.FacebookMiddleware',
 )
 
 ROOT_URLCONF = 'goingspare.urls'
@@ -87,6 +88,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.gis',
     'registration',
+    'socialregistration',
     'goingspare.offers',
     'goingspare.email_lists',
     'goingspare.userprofile',
@@ -102,11 +104,18 @@ INSTALLED_APPS = (
     'djcelery',
 )
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'socialregistration.auth.FacebookAuth',
+)
+
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
 
 LOGIN_URL = '/user/login/'
 
 LOGIN_REDIRECT_URL = '/'
+
+FACEBOOK_REQUEST_PERMISSIONS = 'email'
 
 ACCOUNT_ACTIVATION_DAYS = 7
 

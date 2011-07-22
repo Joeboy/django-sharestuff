@@ -66,7 +66,7 @@ from offers.views import list_offers
 def saved(request, filter_slug):
     # TODO:Make this return a list directly rather than redirecting
     saved_filter = get_object_or_404(SavedFilter, slug=filter_slug)
-    print [(k, getattr(saved_filter,k)) for k in ('donor', 'location', 'max_distance', 'watched_users', 'tags')]
+#    print [(k, getattr(saved_filter,k)) for k in ('donor', 'location', 'max_distance', 'watched_users', 'tags')]
     spec = {}
     if saved_filter.donor:
         spec['donor'] = saved_filter.donor.user.username
