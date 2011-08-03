@@ -31,6 +31,8 @@ class UserProfileForm(forms.ModelForm):
                 }
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
+        if kwargs.get('instance'):
+            self.fields['email'].initial = kwargs['instance'].user.email
 
 
 def view_profile(request, user_id):
@@ -59,8 +61,10 @@ def edit(request):
             request.user.save()
             return HttpResponseRedirect("/user/updated/")
     else:
-        form = UserProfileForm(instance=userprofile,
-                               initial={'email':userprofile.user.email})
+        initial = {'email':userprofile.user.email}
+        if request.facebook and not userprofile.name:
+            initial['name'] = request.facebook.graph.get_object('me')['name']
+        form = UserProfileForm(instance=userprofile, initial=initial)
 
     return render_to_response_context(request, 'userprofile/edit.html', {'userprofile_form':form,})
 

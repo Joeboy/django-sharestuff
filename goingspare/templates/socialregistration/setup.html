@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load socialregistration_tags %}
+{% load facebook_tags %}
+
+<h1>Setup</h1>
+
+{% block content %}
+{% if error %}
+	<p>Your session timed out. Please try again.</p>
+{% else %}
+    <p>Please confirm your username and email address:</p>
+	<form action="." method="post">
+	        {{ form.as_p }}
+	    {% social_csrf_token %}
+	    <input type="submit" value="save" />
+	</form>
+    {% facebook_js %}
+    <script type="text/javascript">
+jQuery(function() {
+ FB.api(
+    {
+      method: 'fql.query',
+      query: 'SELECT name, email FROM user WHERE uid='+FB.getSession().uid
+    },
+    function(response) {
+          var name = response[0].name;
+          name = name.replace(/[^a-z]+/gi, '_');
+          jQuery('#id_username').val(name);
+          jQuery('#id_email').val(response[0].email);
+    }
+  );
+
+});
+    </script>
+{% endif %}
+
+{% endblock %}

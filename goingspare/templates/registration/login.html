@@ -1,9 +1,17 @@
 {% extends "base.html" %}
+{% load facebook_tags %}
 
 {% block content %}
+{% if request.user.is_authenticated %}
+<p>You are already logged in - please <a href="{% url auth_logout %}">log out</a> first if you want to log in as a different user.</p>
+{% else %}
 <form action="" method="POST">
 {% csrf_token %}
 {{ form.as_p }}
 <input type="submit" value="Login" />
 </form>
+<p>or</p>
+{% facebook_button '/media/fb_login_icon.gif' %}
+{% facebook_js %}
+{% endif %}
 {% endblock %}
