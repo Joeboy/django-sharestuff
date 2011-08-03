@@ -62,7 +62,7 @@ def edit(request):
             return HttpResponseRedirect("/user/updated/")
     else:
         initial = {'email':userprofile.user.email}
-        if request.facebook and not userprofile.name:
+        if request.facebook.uid is not None and not userprofile.name:
             initial['name'] = request.facebook.graph.get_object('me')['name']
         form = UserProfileForm(instance=userprofile, initial=initial)
 
