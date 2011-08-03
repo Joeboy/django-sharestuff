@@ -7,6 +7,7 @@ from pyquery import PyQuery
 import lxml
 from datetime import datetime, timedelta
 import re
+from urllib2 import URLError
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.contrib.gis.geos import Point
@@ -128,7 +129,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        html = grab(options['testrun'])
+        try:
+            html = grab(options['testrun'])
+        except URLError, e:
+            print "Failed to grab html:", str(e)
         offers = get_offers(html)
         load_offers(offers)
 
