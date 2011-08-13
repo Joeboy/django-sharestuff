@@ -133,6 +133,7 @@ class Command(BaseCommand):
             html = grab(options['testrun'])
         except URLError, e:
             print "Failed to grab html:", str(e)
-        offers = get_offers(html)
-        load_offers(offers)
+        else:
+            offers = get_offers(html)
+            load_offers(offers)
 
