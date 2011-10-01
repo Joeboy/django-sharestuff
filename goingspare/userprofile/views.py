@@ -24,7 +24,7 @@ class UserProfileForm(forms.ModelForm):
         exclude=('user', 'watched_users', 'email_lists')
 
     class Media:
-        js=("http://www.google.com/jsapi?key=ABQIAAAA0okLrKZhiNabzBlBE2rJHRQRB3d2m0eE07bem--pb7XcM7LibBS3sJZUsLLOaucwIRuf8Q4305bVSw","/media/js/location_widget.js")
+        js=("http://www.google.com/jsapi?key=ABQIAAAA0okLrKZhiNabzBlBE2rJHRS1GW0-vwVibZn9TZDCBhVP4jFc6BSOBkfFHxUta3gowQs2PDOFdH8QJQ","/media/js/location_widget.js")
         css = {'screen': (  "http://www.google.com/uds/css/gsearch.css",
                             "http://www.google.com/uds/solutions/localsearch/gmlocalsearch.css"
                           )
