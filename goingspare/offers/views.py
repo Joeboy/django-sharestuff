@@ -383,7 +383,7 @@ def offer_contact(request, offer_hash):
             Notification.objects.create(to_user=offer.donor,
                                         message=html_message)
             if offer.donor.email_contact:
-                msg = EmailMultiAlternatives('Sharestuff: enquiry about "%s"' % offer.title,
+                msg = EmailMultiAlternatives('FreeShop: enquiry about "%s"' % offer.title,
                                              text_message,
                                              sender.user.email,
                                              [offer.donor.user.email])

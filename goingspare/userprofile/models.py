@@ -35,11 +35,11 @@ class UserProfile(models.Model):
     confirm_following = models.BooleanField("Ask me for permission before allowing people to follow me")
 
     offers_list_public = models.BooleanField("Show my offers' listings to anybody", default=True)
-    offers_list_sharestuffers = models.BooleanField("Show my offers' listings to people logged into ShareStuff", default=True)
+    offers_list_sharestuffers = models.BooleanField("Show my offers' listings to people logged into FreeShop", default=True)
     offers_list_watchers = models.BooleanField("Show my offers' listings to people watching me", default=True)
 
     offers_show_public = models.BooleanField("Show my offers' details to anybody")
-    offers_show_sharestuffers = models.BooleanField("Show my offers' details to people logged into ShareStuff", default=True)
+    offers_show_sharestuffers = models.BooleanField("Show my offers' details to people logged into FreeShop", default=True)
     offers_show_watchers = models.BooleanField("Show my offers' details to people watching me", default=True)
     
 
