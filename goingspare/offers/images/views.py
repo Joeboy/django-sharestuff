@@ -12,11 +12,13 @@ from offers.models import LocalOfferImage
 from offers.decorators import user_offer
 from goingspare.utils import render_to_response_context
 
+
 class LocalImageForm(ModelForm):
     class Meta:
         model = LocalOfferImage
         exclude = ('offer',)
         widgets = {'caption': TextInput}
+
 
 @user_offer
 def add_image(request, offer=None):
@@ -32,23 +34,24 @@ def add_image(request, offer=None):
             if width > 500 or height > 500:
                 if width > height:
                     new_width = 500
-                    new_height = height * float(500)/width
+                    new_height = height * float(500) / width
                 else:
                     new_height = 500
-                    new_width = width * float(500)/height
+                    new_width = width * float(500) / height
                 im.thumbnail((int(new_width), int(new_height)), Image.ANTIALIAS)
             im.save(os.path.join(settings.MEDIA_ROOT, upload_to, filename),
-                    options={'quality':35})
+                    options={'quality': 35})
 
             offer_image = LocalOfferImage.objects.create(
                 image=os.path.join(upload_to, filename),
                 caption=form.cleaned_data['caption'],
-                offer=offer
-                )
-            return HttpResponse(json.dumps({'id':offer_image.id,
-                                            'url':offer_image.image.url,
-                                            'caption':offer_image.caption}))
+                offer=offer)
+            return HttpResponse(json.dumps({'id': offer_image.id,
+                                            'url': offer_image.image.url,
+                                            'caption': offer_image.caption}))
     else:
         form = LocalImageForm()
-    return render_to_response_context(request, 'offers/images/add_image.html', {'form': form, 'form_url':request.path})
+    return render_to_response_context(request,
+                                      'offers/images/add_image.html',
+                                      {'form': form, 'form_url': request.path})
 
