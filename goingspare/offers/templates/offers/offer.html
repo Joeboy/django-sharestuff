@@ -24,7 +24,7 @@ jQuery(function() {
 
 <h4>{{offer.title }}</h4>
 
-{{ offer.description }}
+{{ offer.description|linebreaksbr }}
 {% if offer.distance or offer.distance.km = 0 %}
 <p>About {{ offer.distance.km|floatformat }} km away</p>
 {% endif %}
